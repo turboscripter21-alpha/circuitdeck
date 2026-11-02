@@ -70,6 +70,7 @@
     return status;
   }
   async function ask(body) {
+    if (status === null) await checkStatus(); // ask before the first POST (e.g. Explain opened straight from the sandbox)
     if (status === false) return { notConfigured: true }; // known not configured: no request, no console 503
     let r;
     try {

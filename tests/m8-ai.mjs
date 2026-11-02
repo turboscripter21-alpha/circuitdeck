@@ -169,6 +169,19 @@ await t('sandbox-explain', async () => {
   return { pass: errN >= 2 && issues.some((x) => /5 ?V/.test(x)) && issues.some((x) => /SDA|SCL/.test(x)) && posts[0]?.mode === 'wiring' && typeof posts[0]?.context?.issues === 'string' && posts[0].context.issues.length > 20, issues };
 });
 
+// 7b. sandbox Explain with AI when not configured: friendly banner, no POST (so no console 503)
+await t('sandbox-explain-not-configured', async () => {
+  let n = 0;
+  const c = await ctx((r) => { if (r.request().method() === 'POST') n++; return NOT_CFG(r); }); const p = await page(c, 'sandbox-nc');
+  await p.goto(BASE + '/sandbox/#t=traffic-light'); await ready(p);
+  await p.evaluate(() => { __sb.load({ v: 1, board: 'pi5', name: 'Bad', parts: [{ id: 'b', type: 'button' }], wires: [['GPIO27', 'b.1'], ['b.2', '5V@2']] }); document.querySelector('[data-act="checks"]')?.click(); });
+  await p.waitForTimeout(300); await p.click('.cd-ai-explain');
+  await p.waitForSelector('.cd-ai-banner:not([hidden])'); await p.waitForTimeout(500);
+  const note = await p.textContent('.cd-ai-log');
+  await c.close();
+  return { pass: n === 0 && /AI not configured yet/.test(note), posts: n };
+});
+
 // 8. ML camera: MediaPipe on the fake webcam in the TinyML person detector and the sandbox AI camera
 await t('ml-camera', async () => {
   const c = await ctx(NOT_CFG); const p = await page(c, 'mlcam');
