@@ -51,3 +51,23 @@
 - Sounds: `src/core/sound.js` (Web Audio, synthesized, lazy AudioContext unlocked on first gesture; master gain 0.55). Hooked into `makePart().set()` so lessons and sandbox both get: buzzer tone (on/off + frequency), relay click, servo whir, DC-motor hum, cooler fan whoosh, stepper ticks, button press/release, keypad clicks + accept/deny, camera shutter. Speaker mute toggle next to the theme toggle on Pi 5 + sandbox (localStorage `circuitdeck:sound`, default on).
 - Deployed 5ebc88d from a clean `git archive` copy: dpl_GW6EdSUbdEvM58LNTeZubrnANSpe -> https://circuitdeck.vercel.app (live screenshots `_compare/phase2/pi5model/live-*.png`, 0 errors).
 - Tests: pi-all 29/29 PASS light + dark, 0 errors; sb-test 12/12 templates, 0 errors; smoke all pass, 0 errors; sound/mute test 0 errors on pi5 + sandbox in both themes. Thumbs regenerated (29 Pi 5, 12 sandbox). Screenshots in `_compare/phase2/pi5model/`.
+
+## M8 — AI features — paused (2026-11-02, 11:37 PM IST)
+- Paused for the Pi 5 model v2 interrupt. The WIP (api/ai.js, tutor chat, editor help, MediaPipe, wiring checks, TinyML, Recommended next) is kept uncommitted in `git stash` as "M8 AI WIP (paused for Pi 5 model v2)". It resumes after v2 ships.
+
+## Pi 5 model v2 — art-style match with the ESP32 bundle (2026-11-02)
+- The renderer now copies the ESP32 bundle's parameters 1:1. New `src/core/outline.js` is a port of its edge-pair outline post pass: #141a2c lines, thickness 1.3, depth threshold 0.35 mm, normal threshold 0.22, line scale sqrt(zoom/60), and floor/grid/sprites/lines kept out of the outline.
+- Stage: ortho camera at az 36° / el 43°, no antialias, NoToneMapping. Hemi #fffaf3/#c2ae90 at .5 and key #fff6ea at 1.2. Shadow-only VSM light (2048 map, radius 11, 20 samples). Shadow material #7a5532 at .32 with the floor 4 mm below the parts, and a fading #e0d0b9 grid. RoomEnvironment 0.4. Dark theme: grid #3a4352 and line #0b0e17.
+- ESP32 palette used throughout: metal #e9e6df, shield #e4e3de, pins #dcbf74, header #1f2129, chip #2a2d38, caps #d6b98c, resistors #25272f. The PCB is 2 mm with a flat face (roughness .72) and saturated mask #1f8547 with crisp silkscreen.
+- USB ×4 and RJ45 rebuilt in the ESP32 USB-C metal style: a real front frame with openings and dark back walls, folded lip, seam, fold line, ribs, vents, angled spring tabs, solder legs, tongues with gold contacts. Ethernet adds the latch slot, insert, 8 contacts and LEDs.
+- Chunkier bevelled chips (RAM/RP1 ~2 mm), an SoC lid in shield metal, a Wi-Fi can, larger and fewer SMD parts (~105), bigger LEDs with stronger glow, and a gold header on black bases.
+- meet-pi5 gets ESP32-style callout cards (`stage.setCallouts`): GPIO header, BCM2712, LPDDR4X, RP1, USB 3.0, Ethernet, USB-C power, micro-HDMI, camera/display, fan. They have leaders and click-to-inspect, and become tags when you orbit or zoom.
+- GPIO pin positions and the buildPi5 API are unchanged. PI.t is now 0.2; pi5/sandbox mounted parts follow PI.t.
+- Composites: `_compare/phase2/pi5model/v2-1-side-by-side.png`, `v2-2-detail.png`, `v2-3-light-dark.png`.
+- 2026-11-03 00:30 IST: default framing tuned: meet-pi5 fill .58 on desktop and .8 in compact; callout columns moved out to x −548 and +318, w 222. Next: tests, thumbs, commit, deploy.
+- 2026-11-03 00:40 IST: framing done. `stage.frame` gets a `shift: [px, py]` option. meet-pi5 desktop uses fill .58 with shift [10, 66], so the board centres on the callout rig at about the ESP32's size. Ten cards, w 226, in left, right, top and bottom groups. Phones use fill .8 and show 5 tags (GPIO, SoC, USB-C, USB 3.0, camera) so they don't pile up. New shots: `v2-1-side-by-side.png` (redone), `v2-desktop-light.png`, `v2-4-mobile.png`. Next: tests.
+- 00:54 IST: pi-all light 29/29 PASS, 0 console errors (shots /workspace/p2/s/all). Dark running.
+- 00:54 IST: pi-all dark 29/29 PASS, 0 errors (/workspace/p2/s/all-dark). Next sb-test/smoke/sound.
+- 01:00 IST: sb-test PASS (12 templates, ERRORS 0); sound-test 4/4 errs []. Next smoke.
+- 01:08 IST: smoke all PASS, ERRORS 0. Next thumbs.
+- 01:14 IST: thumbs regenerated (pi5 29, sandbox 12). assets/ unchanged. Committing v2.

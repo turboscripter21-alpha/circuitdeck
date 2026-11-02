@@ -6,23 +6,27 @@
 import * as THREE from 'three';
 import { mat, canvasTexture, info, glowSprite } from './kit.js';
 
-export const PI = { w: 8.5, d: 5.6, t: 0.16 };
+export const PI = { w: 8.5, d: 5.6, t: 0.2 }; // a touch thicker than 1.6 mm, like the ESP32 board reads
 const W = PI.w, D = PI.d, T = PI.t;
 
 // ---------------------------------------------------------------- materials
+// The ESP32 track's palette (assets/stage-*.js), so both boards read as one art
+// style: warm cream metal, charcoal plastics, soft gold pins.
 const M = {
-  steel: () => mat(0xd3d8de, { roughness: 0.28, metalness: 0.92 }),
-  steelDark: () => mat(0x9aa2ab, { roughness: 0.4, metalness: 0.85 }),
-  gold: () => mat(0xe0b85c, { roughness: 0.26, metalness: 0.95 }),
-  black: () => mat(0x1a1c20, { roughness: 0.55 }),
-  cavity: () => mat(0x0b0c0e, { roughness: 0.9 }),
-  chip: () => mat(0x16181c, { roughness: 0.42 }),
-  cream: () => mat(0xece5d4, { roughness: 0.6 }),
-  latch: () => mat(0x6b4d2e, { roughness: 0.5 }),
-  usbBlue: () => mat(0x2e64d2, { roughness: 0.42 }),
-  usbBlack: () => mat(0x202226, { roughness: 0.48 }),
-  edge: () => mat(0x2c4a33, { roughness: 0.8 }),
-  under: () => mat(0x23643a, { roughness: 0.75 }),
+  steel: () => mat(0xe9e6df, { roughness: 0.36, metalness: 0.5 }), // ESP32 "metal"
+  steelDark: () => mat(0xcfcec8, { roughness: 0.4, metalness: 0.5 }), // "shieldEdge"
+  shield: () => mat(0xe4e3de, { roughness: 0.32, metalness: 0.55 }),
+  gold: () => mat(0xdcbf74, { roughness: 0.3, metalness: 0.6 }), // "pin"
+  black: () => mat(0x1f2129, { roughness: 0.55 }), // "header"
+  plastic: () => mat(0x2a2c35, { roughness: 0.5 }),
+  cavity: () => mat(0x0d0f15, { roughness: 0.9 }), // "hole"
+  chip: () => mat(0x2a2d38, { roughness: 0.45 }),
+  cream: () => mat(0xf3eee4, { roughness: 0.6 }), // "ledBase"
+  latch: () => mat(0xd6b98c, { roughness: 0.5, metalness: 0.2 }), // "tan"
+  usbBlue: () => mat(0x2f78c4, { roughness: 0.45 }),
+  usbBlack: () => mat(0x2b2e38, { roughness: 0.5 }), // "tongue"
+  edge: () => mat(0x1b4a2c, { roughness: 0.7 }),
+  under: () => mat(0x1f6b3b, { roughness: 0.72 }),
 };
 
 // ---------------------------------------------------------------- geometry batching
@@ -132,11 +136,11 @@ function drawPcb(smd) {
   return canvasTexture(TW, TH, (ctx) => {
     const R = rng(7);
     // solder mask with a faint mottling
-    ctx.fillStyle = '#23733f'; ctx.fillRect(0, 0, TW, TH);
+    ctx.fillStyle = '#1f8547'; ctx.fillRect(0, 0, TW, TH);
     const grd = ctx.createLinearGradient(0, 0, TW, TH);
     grd.addColorStop(0, 'rgba(255,255,210,0.05)'); grd.addColorStop(1, 'rgba(0,30,10,0.08)');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, TW, TH);
-    for (let i = 0; i < 1400; i++) { ctx.fillStyle = `rgba(${R() < 0.5 ? '255,255,255' : '0,0,0'},0.025)`; ctx.fillRect(R() * TW, R() * TH, 6 + R() * 18, 6 + R() * 18); }
+    for (let i = 0; i < 1400; i++) { ctx.fillStyle = `rgba(${R() < 0.5 ? '255,255,255' : '0,0,0'},0.01)`; ctx.fillRect(R() * TW, R() * TH, 6 + R() * 18, 6 + R() * 18); }
     // copper pour under the mask (slightly lighter), with clearances around parts
     ctx.fillStyle = 'rgba(120,200,120,0.07)';
     ctx.fillRect(tx(-4.1), tz(-1.3), tx(-1.9) - tx(-4.1), tz(0.9) - tz(-1.3));
@@ -166,7 +170,7 @@ function drawPcb(smd) {
       const x = -4.0 + R() * 7.4, z = -2.0 + R() * 4.2;
       if (R() < 0.55) { const dx = (R() - 0.5) * 0.6, dz = (R() - 0.5) * 0.6; trace([[x, z], [x + dx, z], [x + dx, z + dz]], 1.4, 0.18); }
       ctx.fillStyle = 'rgba(205,170,90,0.85)'; ctx.beginPath(); ctx.arc(tx(x), tz(z), 3.2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#123a20'; ctx.beginPath(); ctx.arc(tx(x), tz(z), 1.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0f4a26'; ctx.beginPath(); ctx.arc(tx(x), tz(z), 1.6, 0, Math.PI * 2); ctx.fill();
     }
     // Wi-Fi antenna: a copper meander at the top-left corner
     ctx.strokeStyle = 'rgba(214,170,80,0.85)'; ctx.lineWidth = 4;
@@ -184,7 +188,7 @@ function drawPcb(smd) {
       for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; ctx.fillStyle = '#7d6230'; ctx.beginPath(); ctx.arc(tx(x) + Math.cos(a) * 0.24 * PX, tz(z) + Math.sin(a) * 0.24 * PX, 2.2, 0, Math.PI * 2); ctx.fill(); }
     }
     // pads under the SMD parts
-    ctx.fillStyle = '#cdb07a';
+    ctx.fillStyle = '#d4b26e';
     for (const s of smd) {
       const hw = s.l / 2, pw = s.l * 0.3 * PX, ph = s.w * 1.15 * PX;
       for (const sgn of [-1, 1]) {
@@ -201,7 +205,7 @@ function drawPcb(smd) {
     for (let i = 0; i < 26; i++) { const x = -3.8 + R() * 7, z = -1.6 + R() * 3.5; ctx.fillStyle = '#d8b766'; ctx.beginPath(); ctx.arc(tx(x), tz(z), 0.045 * PX, 0, Math.PI * 2); ctx.fill(); }
 
     // ------------------------------------------------ silkscreen
-    const silk = 'rgba(248,248,240,0.93)';
+    const silk = '#eeefee'; // ESP32 silkscreen white
     ctx.fillStyle = silk; ctx.strokeStyle = silk; ctx.textBaseline = 'middle';
     const text = (t, x, z, size, { align = 'center', weight = 700, rot = 0 } = {}) => {
       ctx.save(); ctx.translate(tx(x), tz(z)); ctx.rotate(rot);
@@ -255,23 +259,22 @@ function chipTex(kind) {
   const S = 256;
   return canvasTexture(S, S, (c) => {
     if (kind === 'soc') {
-      const g = c.createLinearGradient(0, 0, S, S); g.addColorStop(0, '#dfe3e8'); g.addColorStop(0.5, '#c7ccd2'); g.addColorStop(1, '#d6dade');
+      const g = c.createLinearGradient(0, 0, S, S); g.addColorStop(0, '#eeede8'); g.addColorStop(0.5, '#e2e1db'); g.addColorStop(1, '#e8e7e1');
       c.fillStyle = g; c.fillRect(0, 0, S, S);
-      for (let i = 0; i < 260; i++) { c.fillStyle = `rgba(255,255,255,${Math.random() * 0.06})`; c.fillRect(0, Math.random() * S, S, 1); }
-      raspberry(c, S * 0.26, S * 0.33, 22, 'rgba(70,76,84,0.75)');
-      c.fillStyle = 'rgba(62,68,76,0.82)'; c.textAlign = 'left'; c.textBaseline = 'middle';
+            raspberry(c, S * 0.26, S * 0.33, 22, '#3a3f4c');
+      c.fillStyle = '#3a3f4c'; c.textAlign = 'left'; c.textBaseline = 'middle';
       c.font = '700 26px "Barlow Semi Condensed", sans-serif'; c.fillText('BROADCOM', S * 0.44, S * 0.28);
       c.font = '700 30px "Barlow Semi Condensed", sans-serif'; c.fillText('BCM2712', S * 0.44, S * 0.42);
       c.font = '600 19px "Barlow Semi Condensed", sans-serif';
       c.fillText('ZPKFSB06C0T', S * 0.16, S * 0.62); c.fillText('2335 PB01 · TW', S * 0.16, S * 0.74); c.fillText('© 2023 RPL', S * 0.16, S * 0.86);
     } else {
-      c.fillStyle = '#17191d'; c.fillRect(0, 0, S, S);
-      c.fillStyle = 'rgba(205,208,212,0.72)'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = '#2a2d38'; c.fillRect(0, 0, S, S);
+      c.fillStyle = 'rgba(238,239,238,0.9)'; c.textAlign = 'center'; c.textBaseline = 'middle';
       if (kind === 'ram') { c.font = '700 34px "Barlow Semi Condensed", sans-serif'; c.fillText('SAMSUNG', S / 2, S * 0.3); c.font = '600 24px "Barlow Semi Condensed", sans-serif'; c.fillText('K4UBE3D4AB', S / 2, S * 0.5); c.fillText('MGCL  LPDDR4X', S / 2, S * 0.66); c.fillText('331  8GB', S / 2, S * 0.8); }
-      if (kind === 'rp1') { raspberry(c, S / 2, S * 0.36, 30, 'rgba(205,208,212,0.72)'); c.font = '700 40px "Barlow Semi Condensed", sans-serif'; c.fillText('RP1-C0', S / 2, S * 0.74); c.font = '600 20px "Barlow Semi Condensed", sans-serif'; c.fillText('2316 TW', S / 2, S * 0.88); }
+      if (kind === 'rp1') { raspberry(c, S / 2, S * 0.36, 30, 'rgba(238,239,238,0.9)'); c.font = '700 40px "Barlow Semi Condensed", sans-serif'; c.fillText('RP1-C0', S / 2, S * 0.74); c.font = '600 20px "Barlow Semi Condensed", sans-serif'; c.fillText('2316 TW', S / 2, S * 0.88); }
       if (kind === 'pmic') { c.font = '700 54px "Barlow Semi Condensed", sans-serif'; c.fillText('DA9091', S / 2, S * 0.45); c.font = '600 34px "Barlow Semi Condensed", sans-serif'; c.fillText('RPI-03', S / 2, S * 0.72); }
       if (kind === 'phy') { c.font = '700 44px "Barlow Semi Condensed", sans-serif'; c.fillText('BCM', S / 2, S * 0.38); c.fillText('54213PE', S / 2, S * 0.62); }
-      if (kind === 'wifi') { c.fillStyle = '#cdd2d8'; c.fillRect(0, 0, S, S); c.fillStyle = 'rgba(70,76,84,0.75)'; c.font = '700 30px "Barlow Semi Condensed", sans-serif'; c.fillText('Raspberry Pi', S / 2, S * 0.38); c.font = '600 22px "Barlow Semi Condensed", sans-serif'; c.fillText('CYW43455 · 2.4/5 GHz', S / 2, S * 0.56); c.fillText('FCC ID 2ABCB-RPI5', S / 2, S * 0.72); }
+      if (kind === 'wifi') { c.fillStyle = '#e4e3de'; c.fillRect(0, 0, S, S); c.fillStyle = 'rgba(70,76,84,0.75)'; c.font = '700 30px "Barlow Semi Condensed", sans-serif'; c.fillText('Raspberry Pi', S / 2, S * 0.38); c.font = '600 22px "Barlow Semi Condensed", sans-serif'; c.fillText('CYW43455 · 2.4/5 GHz', S / 2, S * 0.56); c.fillText('FCC ID 2ABCB-RPI5', S / 2, S * 0.72); }
       // pin-1 dot
       if (kind !== 'wifi') { c.fillStyle = 'rgba(255,255,255,0.22)'; c.beginPath(); c.arc(S * 0.1, S * 0.1, 8, 0, Math.PI * 2); c.fill(); }
     }
@@ -289,62 +292,54 @@ function topDecal(w, d, tex, y, { r = 0.02, metal = false } = {}) {
 }
 
 // ---------------------------------------------------------------- connectors
-// USB-A double stack. Opening faces +x. Local origin: centre bottom.
-function usbStack(b, tongue, usb3) {
-  const Lx = 1.75, H = 1.6, Wz = 1.32, t = 0.035;
-  const steel = M.steel();
-  b.box(Lx, t, Wz, steel, 0, H - t, 0, { line: true });
-  b.box(Lx, t, Wz, steel, 0, 0, 0);
-  for (const s of [-1, 1]) b.box(Lx, H, t, steel, 0, 0, s * (Wz / 2 - t / 2), { line: true });
-  b.box(t, H, Wz, steel, -Lx / 2 + t / 2, 0, 0);
-  b.box(Lx - 0.02, 0.14, Wz - 2 * t, steel, 0, H / 2 - 0.07, 0); // divider between the two ports
-  // front flange lips
-  b.box(0.03, 0.05, Wz + 0.1, steel, Lx / 2, H - 0.05, 0);
-  b.box(0.03, 0.05, Wz + 0.1, steel, Lx / 2, 0, 0);
-  for (const s of [-1, 1]) b.box(0.03, H, 0.05, steel, Lx / 2, 0, s * (Wz / 2 + 0.025));
-  // dark rear inside each port
-  b.box(0.05, H - 0.1, Wz - 0.1, M.cavity(), -Lx / 2 + 0.3, 0.05, 0);
-  // dark liners so each opening reads as a hole, leaving a bright metal rim
-  const li = Lx - 0.5, lx = -0.2;
-  for (const y0 of [t, H / 2 + 0.07]) {
-    const ph = H / 2 - 0.07 - t;
-    b.box(li, 0.01, Wz - 2 * t - 0.02, M.cavity(), lx, y0 + 0.001, 0);
-    b.box(li, 0.01, Wz - 2 * t - 0.02, M.cavity(), lx, y0 + ph - 0.012, 0);
-    for (const s of [-1, 1]) b.box(li, ph - 0.02, 0.01, M.cavity(), lx, y0 + 0.01, s * (Wz / 2 - t - 0.006));
+// Stamped-metal shell shared by the USB stacks and the RJ45 jack, in the ESP32
+// USB-C's style: cream metal, a fold line round the front, seams, embossed ribs and
+// vent slots on the top, and spring tabs. Opening faces +x. Local origin: centre bottom.
+function shell(b, Lx, H, Wz, mouths) {
+  const steel = M.steel(), dark = M.steelDark(), F = 0.34; // depth of the open front
+  // the closed back part, then a front frame with real openings (so you can see in)
+  b.extrude(roundRect(Wz, H, 0.06, 0, H / 2), Lx - F, steel, { axis: 'x', x: -Lx / 2 });
+  const front = roundRect(Wz, H, 0.06, 0, H / 2);
+  for (const m of mouths) front.holes.push(roundRect(m.w, m.h, m.r ?? 0.05, 0, m.y + m.h / 2));
+  b.extrude(front, F, steel, { axis: 'x', x: Lx / 2 - F });
+  // the back of each opening, dark
+  for (const m of mouths) b.box(0.02, m.h, m.w, M.cavity(), Lx / 2 - F + 0.01, m.y, 0);
+  // folded front lip: a raised rim round the face
+  const lip = roundRect(Wz + 0.06, H + 0.06, 0.08, 0, H / 2); lip.holes.push(roundRect(Wz - 0.08, H - 0.08, 0.04, 0, H / 2));
+  b.extrude(lip, 0.07, steel, { axis: 'x', x: Lx / 2 - 0.07 });
+  // seam down the back and the fold line across the top
+  b.box(0.02, H * 0.9, 0.025, dark, -Lx / 2 - 0.005, H * 0.05, 0);
+  b.box(Lx * 0.82, 0.012, 0.03, dark, -0.06, H, 0);
+  // embossed ribs + vent slots on top
+  for (const z of [-0.3, 0.3]) b.box(Lx * 0.42, 0.03, 0.1, steel, -Lx * 0.2, H, z * Wz);
+  for (let i = 0; i < 3; i++) b.box(0.26, 0.006, 0.05, M.cavity(), Lx * 0.16, H + 0.001, (-0.13 + i * 0.13) * Wz);
+  // spring tabs bent out on both sides, and solder legs
+  for (const sgn of [-1, 1]) {
+    const tab = new THREE.BoxGeometry(0.34, 0.22, 0.03); tab.rotateY(sgn * 0.2); tab.translate(Lx / 2 - 0.5, H * 0.5, sgn * (Wz / 2 + 0.025)); b.put(tab, dark);
+    b.box(0.12, 0.18, 0.05, dark, -Lx / 4, -0.14, sgn * (Wz / 2 - 0.02));
   }
-  // tongues + contacts
-  for (const y0 of [0.07, H / 2 + 0.07]) {
-    const ty = y0 + 0.36;
-    b.box(Lx * 0.62, 0.16, Wz * 0.7, tongue, Lx / 2 - Lx * 0.31 - 0.1, ty, 0);
-    for (let i = 0; i < 4; i++) b.box(0.42, 0.012, 0.1, M.gold(), Lx / 2 - 0.4, ty - 0.012, -0.33 + i * 0.22);
-    if (usb3) for (let i = 0; i < 5; i++) b.box(0.18, 0.012, 0.07, M.gold(), Lx / 2 - 0.85, ty - 0.012, -0.3 + i * 0.15);
-  }
-  // retention springs on the top + side dimples
-  for (const z of [-0.35, 0.35]) b.box(0.4, 0.02, 0.14, M.steelDark(), Lx / 2 - 0.45, H, z);
-  for (const y of [0.4, 1.2]) for (const s of [-1, 1]) b.box(0.25, 0.12, 0.02, M.steelDark(), Lx / 2 - 0.4, y, s * (Wz / 2 + 0.005));
 }
-// RJ45 jack, opening faces +x
-function ethernet(b) {
-  const Lx = 2.1, H = 1.35, Wz = 1.6, t = 0.035, steel = M.steel();
-  const oW = 1.18, oH = 0.86, oy = 0.16; // opening
-  b.box(Lx, t, Wz, steel, 0, H - t, 0, { line: true });
-  b.box(Lx, t, Wz, steel, 0, 0, 0);
-  for (const s of [-1, 1]) b.box(Lx, H, t, steel, 0, 0, s * (Wz / 2 - t / 2), { line: true });
-  b.box(t, H, Wz, steel, -Lx / 2 + t / 2, 0, 0);
-  // front plate with the opening
-  const fx = Lx / 2 - t / 2;
-  b.box(t, H - oy - oH, Wz, steel, fx, oy + oH, 0);
-  b.box(t, oy, Wz, steel, fx, 0, 0);
-  for (const s of [-1, 1]) b.box(t, oH, (Wz - oW) / 2, steel, fx, oy, s * (oW / 2 + (Wz - oW) / 4));
-  // black plastic inside, the key slot at the bottom, and 8 gold contacts
-  b.box(Lx - 0.35, oH, oW, M.black(), -0.1, oy, 0);
-  b.box(0.02, oH * 0.9, oW * 0.92, M.cavity(), Lx / 2 - 0.38, oy + 0.02, 0);
-  b.box(0.3, 0.2, 0.46, M.cavity(), Lx / 2 - 0.2, oy, 0);
-  for (let i = 0; i < 8; i++) {
-    const g = new THREE.BoxGeometry(0.42, 0.016, 0.04); g.rotateZ(0.5); g.translate(Lx / 2 - 0.55, oy + oH - 0.2, -0.35 + i * 0.1); b.put(g, M.gold());
+// USB-A double stack: two openings, each with a coloured tongue carrying gold contacts
+function usbStack(b, tongue, usb3) {
+  const Lx = 1.62, H = 1.42, Wz = 1.26, ow = Wz - 0.22, oh = 0.5;
+  const ys = [0.12, H / 2 + 0.09];
+  shell(b, Lx, H, Wz, ys.map((y) => ({ y, h: oh, w: ow, r: 0.03 })));
+  for (const y0 of ys) {
+    const ty = y0 + oh * 0.5;
+    b.box(0.3, 0.13, ow * 0.8, tongue, Lx / 2 - 0.2, ty, 0);
+    for (let i = 0; i < 4; i++) b.box(0.24, 0.01, 0.1, M.gold(), Lx / 2 - 0.18, ty - 0.008, -0.3 + i * 0.2);
+    if (usb3) for (let i = 0; i < 5; i++) b.box(0.07, 0.01, 0.07, M.gold(), Lx / 2 - 0.3, ty + 0.13, -0.32 + i * 0.16);
+    // springy retention fingers in the top of each mouth
+    for (const z of [-0.28, 0.28]) b.box(0.14, 0.03, 0.1, M.steelDark(), Lx / 2 - 0.1, y0 + oh - 0.03, z);
   }
-  // ground tabs
-  for (const s of [-1, 1]) b.box(0.03, 0.4, 0.2, M.steelDark(), Lx / 2 + 0.01, H - 0.55, s * 0.62);
+}
+// RJ45 jack: one big mouth with the latch slot below and 8 contacts at the top
+function ethernet(b) {
+  const Lx = 2.0, H = 1.28, Wz = 1.52, oW = 1.08, oH = 0.8, oy = 0.2;
+  shell(b, Lx, H, Wz, [{ y: oy, h: oH, w: oW, r: 0.03 }, { y: oy - 0.15, h: 0.12, w: 0.42, r: 0.01 }]);
+  // dark plastic insert and gold contact fingers
+  b.box(0.3, 0.12, oW, M.plastic(), Lx / 2 - 0.18, oy + oH - 0.12, 0);
+  for (let i = 0; i < 8; i++) { const g = new THREE.BoxGeometry(0.26, 0.016, 0.045); g.rotateZ(0.45); g.translate(Lx / 2 - 0.2, oy + oH - 0.2, -0.35 + i * 0.1); b.put(g, M.gold()); }
 }
 // a horizontal receptacle (USB-C / micro-HDMI) opening to +z; `outer`/`inner` are shapes in XY
 function receptacle(b, outer, inner, depth, tongueW, tongueH, y0) {
@@ -391,7 +386,6 @@ export function buildPi5Model(PI_HEADER) {
   const g = new THREE.Group();
   g.name = 'pi5';
   const parts = [];
-  const outlineGeos = [];
   const part = (build, data, x = 0, z = 0, ry = 0, y = T) => {
     const grp = new THREE.Group();
     const b = new Batch();
@@ -399,7 +393,6 @@ export function buildPi5Model(PI_HEADER) {
     b.mesh(grp);
     grp.position.set(x, y, z); grp.rotation.y = ry;
     grp.updateMatrix();
-    for (const og of b.outline) outlineGeos.push(og.clone().applyMatrix4(grp.matrix));
     if (data) info(grp, data);
     g.add(grp); if (data) parts.push(grp);
     return grp;
@@ -416,44 +409,44 @@ export function buildPi5Model(PI_HEADER) {
   const free = (x, z, r) => x > -W / 2 + 0.15 && x < W / 2 - 0.15 && z > -D / 2 + 0.15 && z < D / 2 - 0.15 &&
     keepOut.every(([[cx, cz], w, d]) => Math.abs(x - cx) > w / 2 + r || Math.abs(z - cz) > d / 2 + r);
   const R = rng(42), smd = [];
-  for (let tries = 0; smd.length < 170 && tries < 6000; tries++) {
+  for (let tries = 0; smd.length < 105 && tries < 6000; tries++) {
     // cluster around the SoC/RAM/RP1/PMIC like decoupling caps
     const near = [L.soc, L.ram, L.rp1, L.pmic, L.wifi, L.phy, [0, 0]][Math.floor(R() * 7)];
     const x = near[0] + (R() - 0.5) * 3.2, z = near[1] + (R() - 0.5) * 2.6;
-    const big = R() < 0.18, l = big ? 0.2 : 0.1, w = big ? 0.1 : 0.05;
+    const big = R() < 0.25, l = big ? 0.3 : 0.18, w = big ? 0.16 : 0.1; // chunky, like the ESP32's 0603s
     if (!free(x, z, l * 0.7)) continue;
-    if (smd.some((s) => Math.abs(s.x - x) < 0.17 && Math.abs(s.z - z) < 0.12)) continue;
-    smd.push({ x, z, l, w, h: big ? 0.07 : 0.04, rot: R() < 0.4, kind: R() < 0.7 ? 'cap' : 'res' });
+    if (smd.some((s) => Math.abs(s.x - x) < 0.3 && Math.abs(s.z - z) < 0.22)) continue;
+    smd.push({ x, z, l, w, h: big ? 0.12 : 0.08, rot: R() < 0.4, kind: R() < 0.7 ? 'cap' : 'res' });
   }
 
   // ---------------- PCB: rounded slab with real holes, textured top
-  const shape = roundRect(W, D, 0.3);
+  const shape = roundRect(W, D, 0.3); // 3 mm corners as on the real board
   for (const [x, z] of L.holes) shape.holes.push(holePath(x, -z, 0.14));
-  const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: T - 0.02, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.012, bevelSegments: 2, curveSegments: 10 });
-  bodyGeo.rotateX(-Math.PI / 2); bodyGeo.translate(0, 0.01, 0);
+  const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: T, bevelEnabled: false, curveSegments: 10 });
+  bodyGeo.rotateX(-Math.PI / 2);
   const body = new THREE.Mesh(bodyGeo, [M.under(), M.edge()]);
   body.castShadow = true; body.receiveShadow = true;
   const topGeo = new THREE.ShapeGeometry(shape, 10);
   { const uv = topGeo.attributes.uv, pos = topGeo.attributes.position; for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + W / 2) / W, (pos.getY(i) + D / 2) / D); }
   topGeo.rotateX(-Math.PI / 2);
   const pcbTex = drawPcb(smd); pcbTex.anisotropy = 8;
-  const top = new THREE.Mesh(topGeo, new THREE.MeshStandardMaterial({ map: pcbTex, roughness: 0.55, metalness: 0.05 }));
+  const top = new THREE.Mesh(topGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, map: pcbTex, roughness: 0.72 }));
   top.position.y = T + 0.0015; top.receiveShadow = true;
   const pcb = new THREE.Group(); pcb.add(body, top);
   info(pcb, { title: 'Raspberry Pi 5', desc: 'A credit-card computer: a 2.4 GHz quad-core Arm Cortex-A76 (BCM2712), with RP1 handling the I/O.', rows: [['Size', '85 × 56 mm'], ['Power', '5 V / 5 A, USB-C PD'], ['GPIO logic', '3.3 V (not 5 V tolerant)']] });
   g.add(pcb); parts.push(pcb);
-  { const e = new THREE.EdgesGeometry(bodyGeo, 40); outlineGeos.push(e); }
 
   // ---------------- SMD instanced
   {
     const n = smd.length;
     const bodyM = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 0.5 }), n);
     const endM = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), M.steel(), n * 2);
+    bodyM.castShadow = endM.castShadow = true;
     const o = new THREE.Object3D(), col = new THREE.Color();
     smd.forEach((s, i) => {
       o.position.set(s.x, T + s.h / 2, s.z); o.rotation.set(0, s.rot ? Math.PI / 2 : 0, 0); o.scale.set(s.l * 0.62, s.h, s.w); o.updateMatrix();
       bodyM.setMatrixAt(i, o.matrix);
-      bodyM.setColorAt(i, col.set(s.kind === 'cap' ? (i % 5 ? 0xb39a72 : 0x8c7a5a) : 0x1d1f23));
+      bodyM.setColorAt(i, col.set(s.kind === 'cap' ? (i % 4 ? 0xd6b98c : 0xb08a5a) : 0x25272f));
       for (const sg of [-1, 1]) {
         const dx = sg * s.l * 0.4;
         o.position.set(s.x + (s.rot ? 0 : dx), T + s.h / 2, s.z + (s.rot ? dx : 0)); o.scale.set(s.l * 0.2, s.h * 1.02, s.w * 1.02); o.updateMatrix();
@@ -467,20 +460,22 @@ export function buildPi5Model(PI_HEADER) {
 
   // ---------------- chips
   part((b, grp) => {
-    b.box(1.9, 0.07, 1.9, mat(0x2a4a35, { roughness: 0.6 }), 0, 0, 0, { line: true }); // substrate
+    b.box(1.9, 0.08, 1.9, mat(0x2c3140, { roughness: 0.6 }), 0, 0, 0); // substrate (ESP32 module-PCB colour)
     for (let i = 0; i < 10; i++) for (const s of [-1, 1]) b.box(0.08, 0.03, 0.05, M.gold(), -0.8 + i * 0.18, 0.07, s * 0.86);
-    b.extrude(roundRect(1.62, 1.62, 0.1), 0.1, M.steel(), { axis: 'y', y: 0.07, line: true });
-    grp.add(topDecal(1.6, 1.6, chipTex('soc'), 0.172, { r: 0.1, metal: true }));
+    b.extrude(roundRect(1.58, 1.58, 0.1), 0.1, M.shield(), { axis: 'y', y: 0.105, bevel: 0.025 });
+    grp.add(topDecal(1.56, 1.56, chipTex('soc'), 0.233, { r: 0.1, metal: true }));
   }, { title: 'BCM2712 SoC', desc: 'Broadcom BCM2712: four Arm Cortex-A76 cores at 2.4 GHz and a VideoCore VII GPU (OpenGL ES 3.1, Vulkan 1.2).', rows: [['CPU', '4 × Cortex-A76 @ 2.4 GHz'], ['GPU', 'VideoCore VII'], ['Video', 'Dual 4Kp60 HDMI, 4Kp60 HEVC decode']] }, L.soc[0], L.soc[1]);
 
+  // chunky bevelled packages with a crisp printed top, like the ESP32's chips
   const pkg = (w, d, h, tex, data, x, z, ry = 0) => part((b, grp) => {
-    b.extrude(roundRect(w, d, 0.03), h, M.chip(), { axis: 'y', line: true });
-    grp.add(topDecal(w - 0.02, d - 0.02, chipTex(tex), h + 0.002));
+    const bv = 0.025;
+    b.extrude(roundRect(w - 2 * bv, d - 2 * bv, 0.03), h - 2 * bv, M.chip(), { axis: 'y', y: bv, bevel: bv });
+    grp.add(topDecal(w - 2 * bv - 0.02, d - 2 * bv - 0.02, chipTex(tex), h + 0.003, { r: 0.03 }));
   }, data, x, z, ry);
-  pkg(1.3, 1.45, 0.12, 'ram', { title: 'LPDDR4X SDRAM', desc: 'The working memory, LPDDR4X-4267. Pi 5 comes in 1, 2, 4, 8 and 16 GB versions.', rows: [['Type', 'LPDDR4X-4267'], ['Sizes', '1 / 2 / 4 / 8 / 16 GB']] }, L.ram[0], L.ram[1], Math.PI / 2);
-  pkg(1.05, 1.05, 0.12, 'rp1', { title: 'RP1 I/O controller', desc: 'Raspberry Pi’s own “southbridge”, linked to the SoC over PCIe 2.0 ×4. It runs the GPIO header, USB, Ethernet and the MIPI camera/display ports.', rows: [['Link', 'PCIe 2.0 ×4 to BCM2712'], ['Handles', 'GPIO · USB · Ethernet · MIPI'], ['GPIO library', 'gpiozero (lgpio)']] }, L.rp1[0], L.rp1[1]);
-  pkg(0.6, 0.6, 0.08, 'pmic', { title: 'Power management IC', desc: 'Renesas DA9091 PMIC: makes the core voltages from the 5 V input, and powers the real-time clock.', rows: [['Input', '5 V from USB-C']] }, L.pmic[0], L.pmic[1]);
-  pkg(0.62, 0.62, 0.08, 'phy', { title: 'Gigabit Ethernet PHY', desc: 'Broadcom BCM54213PE: turns the Ethernet MAC inside RP1 into signals on the wire.', rows: [['Speed', '10/100/1000 Mbps']] }, L.phy[0], L.phy[1]);
+  pkg(1.3, 1.45, 0.2, 'ram', { title: 'LPDDR4X SDRAM', desc: 'The working memory, LPDDR4X-4267. Pi 5 comes in 1, 2, 4, 8 and 16 GB versions.', rows: [['Type', 'LPDDR4X-4267'], ['Sizes', '1 / 2 / 4 / 8 / 16 GB']] }, L.ram[0], L.ram[1], Math.PI / 2);
+  pkg(1.05, 1.05, 0.18, 'rp1', { title: 'RP1 I/O controller', desc: 'Raspberry Pi’s own “southbridge”, linked to the SoC over PCIe 2.0 ×4. It runs the GPIO header, USB, Ethernet and the MIPI camera/display ports.', rows: [['Link', 'PCIe 2.0 ×4 to BCM2712'], ['Handles', 'GPIO · USB · Ethernet · MIPI'], ['GPIO library', 'gpiozero (lgpio)']] }, L.rp1[0], L.rp1[1]);
+  pkg(0.62, 0.62, 0.13, 'pmic', { title: 'Power management IC', desc: 'Renesas DA9091 PMIC: makes the core voltages from the 5 V input, and powers the real-time clock.', rows: [['Input', '5 V from USB-C']] }, L.pmic[0], L.pmic[1]);
+  pkg(0.64, 0.64, 0.13, 'phy', { title: 'Gigabit Ethernet PHY', desc: 'Broadcom BCM54213PE: turns the Ethernet MAC inside RP1 into signals on the wire.', rows: [['Speed', '10/100/1000 Mbps']] }, L.phy[0], L.phy[1]);
   // inductors and a crystal next to the PMIC / SoC
   part((b) => {
     for (const [x, z] of [[-0.55, -0.15], [-0.55, 0.3], [0.5, 0.35]]) { b.box(0.32, 0.18, 0.32, mat(0x3a3d42, { roughness: 0.7 }), x, 0, z, { line: true }); b.box(0.24, 0.005, 0.24, mat(0x55585e, { roughness: 0.6 }), x, 0.18, z); }
@@ -490,24 +485,24 @@ export function buildPi5Model(PI_HEADER) {
 
   // Wi-Fi/BT can
   part((b, grp) => {
-    b.extrude(roundRect(1.1, 0.95, 0.04), 0.16, M.steel(), { axis: 'y', line: true });
-    for (let i = 0; i < 4; i++) b.cyl(0.03, 0.01, M.steelDark(), -0.4 + i * 0.27, 0.16, 0.38, { seg: 8 });
-    grp.add(topDecal(1.0, 0.85, chipTex('wifi'), 0.162, { metal: true }));
+    b.extrude(roundRect(1.06, 0.91, 0.04), 0.17, M.shield(), { axis: 'y', y: 0.02, bevel: 0.02 });
+    for (let i = 0; i < 4; i++) b.cyl(0.03, 0.01, M.steelDark(), -0.4 + i * 0.27, 0.21, 0.38, { seg: 8 });
+    grp.add(topDecal(1.0, 0.85, chipTex('wifi'), 0.213, { metal: true }));
   }, { title: 'Wi-Fi + Bluetooth', desc: 'Dual-band 802.11ac Wi-Fi and Bluetooth 5.0 / BLE, under a metal shield; the antenna is the copper pattern at the board corner.', rows: [['Wi-Fi', '802.11ac, 2.4 + 5 GHz'], ['Bluetooth', '5.0 / BLE']] }, L.wifi[0], L.wifi[1]);
 
   // ---------------- right edge: USB 2.0, USB 3.0, Ethernet
-  const usbX = W / 2 - 1.75 / 2 + 0.2;
+  const usbX = W / 2 - 1.62 / 2 + 0.2;
   part((b) => usbStack(b, M.usbBlack(), false), { title: 'USB 2.0 ports', desc: 'Two USB 2.0 ports (black) for keyboards, mice and other slow devices.', rows: [['Ports', '2 × USB 2.0'], ['Total USB current', '1.6 A with a 5 A supply, 600 mA with 3 A']] }, usbX, L.usb2);
   part((b) => usbStack(b, M.usbBlue(), true), { title: 'USB 3.0 ports', desc: 'Two USB 3.0 ports (blue), 5 Gbps each, and both can run at full speed at the same time.', rows: [['Ports', '2 × USB 3.0'], ['Speed', '5 Gbps each, simultaneous']] }, usbX, L.usb3);
   const ethLeds = [];
   part((b, grp) => {
     ethernet(b);
     for (const [s, c, i] of [[-1, 0xffb020, 0.7], [1, 0x34d058, 0.9]]) {
-      const led = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.1, 0.16), mat(c, { emissive: c, unique: true }));
-      led.material.emissiveIntensity = i; led.position.set(1.06, 0.08, s * 0.66); grp.add(led); ethLeds.push(led);
-      const gs = glowSprite(c, 0.45); gs.material.opacity = 0.55; gs.position.set(1.12, 0.13, s * 0.66); grp.add(gs);
+      const led = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.12, 0.18), mat(c, { roughness: 0.3, emissive: c, unique: true }));
+      led.material.emissiveIntensity = i * 1.3; led.position.set(1.01, 0.07, s * 0.6); grp.add(led); ethLeds.push(led);
+      const gs = glowSprite(c, 0.6); gs.material.opacity = 0.5; gs.position.set(1.1, 0.13, s * 0.6); grp.add(gs);
     }
-  }, { title: 'Gigabit Ethernet', desc: 'Wired networking at up to 1 Gbps, with PoE+ support through a separate PoE+ HAT. The two LEDs show link and activity.', rows: [['Speed', '1 Gbps'], ['PoE', 'PoE+ with a PoE+ HAT']] }, W / 2 - 1.05 + 0.2, L.eth);
+  }, { title: 'Gigabit Ethernet', desc: 'Wired networking at up to 1 Gbps, with PoE+ support through a separate PoE+ HAT. The two LEDs show link and activity.', rows: [['Speed', '1 Gbps'], ['PoE', 'PoE+ with a PoE+ HAT']] }, W / 2 - 1.0 + 0.2, L.eth);
 
   // ---------------- bottom edge: USB-C, 2 × micro HDMI, RTC battery, UART
   const edgeZ = D / 2 - 0.36;
@@ -533,15 +528,15 @@ export function buildPi5Model(PI_HEADER) {
     b.box(0.04, 0.24, 0.48, M.steel(), 0.16, 0.0, 0);
     b.cyl(0.085, 0.1, mat(0xe9e5dc, { roughness: 0.4 }), -0.2, 0.13, 0, { axis: 'x', seg: 18 });
   }, { title: 'Power button', desc: 'Press to start, press to request a clean shutdown, hold to force power off.', rows: [['Behaviour', 'Start · shutdown · force off']] }, -W / 2 + 0.22, L.btn);
-  const ledGeo = new THREE.BoxGeometry(0.16, 0.07, 0.1);
+  const ledGeo = new THREE.BoxGeometry(0.22, 0.1, 0.16);
   const pwrLed = new THREE.Mesh(ledGeo, mat(0xff3b30, { emissive: 0xff3b30, unique: true }));
-  pwrLed.material.emissiveIntensity = 0.9;
-  pwrLed.position.set(-W / 2 + 0.25, T + 0.035, L.ledPwr);
-  const pwrGlow = glowSprite(0xff4a3a, 0.7); pwrGlow.material.opacity = 0.7; pwrGlow.position.set(-W / 2 + 0.2, T + 0.12, L.ledPwr);
+  pwrLed.material.emissiveIntensity = 1.2;
+  pwrLed.position.set(-W / 2 + 0.25, T + 0.05, L.ledPwr);
+  const pwrGlow = glowSprite(0xff4a3a, 0.9); pwrGlow.material.opacity = 0.6; pwrGlow.position.set(-W / 2 + 0.2, T + 0.12, L.ledPwr);
   const actLed = new THREE.Mesh(ledGeo, mat(0x34c759, { emissive: 0x34c759, unique: true }));
   actLed.material.emissiveIntensity = 0.2;
-  actLed.position.set(-W / 2 + 0.25, T + 0.035, L.ledAct);
-  const actGlow = glowSprite(0x3ee06a, 0.7); actGlow.position.set(-W / 2 + 0.2, T + 0.12, L.ledAct);
+  actLed.position.set(-W / 2 + 0.25, T + 0.05, L.ledAct);
+  const actGlow = glowSprite(0x3ee06a, 0.9); actGlow.position.set(-W / 2 + 0.2, T + 0.12, L.ledAct);
   // the activity glow follows whatever the sims do to the LED's emissive intensity
   actLed.onBeforeRender = () => { actGlow.material.opacity = Math.min(0.9, Math.max(0, (actLed.material.emissiveIntensity - 0.25) * 0.75)); };
   for (const m of [pwrLed, actLed]) { m.castShadow = false; }
@@ -589,21 +584,7 @@ export function buildPi5Model(PI_HEADER) {
     wall.material.side = THREE.BackSide; wall.position.set(x, T / 2, z); g.add(wall);
   }
 
-  // ---------------- outlines (one draw call), like the ESP32 track's ink lines
-  {
-    const segs = [];
-    for (const geo of outlineGeos) {
-      const e = geo.type === 'EdgesGeometry' ? geo : new THREE.EdgesGeometry(geo, 35);
-      segs.push(e.attributes.position.array);
-    }
-    let n = 0; for (const a of segs) n += a.length;
-    const arr = new Float32Array(n); let o = 0; for (const a of segs) { arr.set(a, o); o += a.length; }
-    const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(arr, 3));
-    const lines = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0x141a2c, transparent: true, opacity: 0.55 }));
-    lines.raycast = () => {};
-    lines.name = 'pi5-outline';
-    g.add(lines);
-  }
+  // (ink outlines come from the stage's outline pass, as on the ESP32 track)
 
   return { group: g, parts, tips, tipsByPhys, actLed };
 }

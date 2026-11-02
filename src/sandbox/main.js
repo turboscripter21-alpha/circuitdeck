@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { createFit, startClock, storeGet, storeSet, esc } from '../core/layout.js';
 import { createStage } from '../core/stage.js';
+import { PI } from '../core/pi5model.js';
 import { sfx, isSoundOn, setSound } from '../core/sound.js';
 import { buildPi5, buildEsp32, buildBreadboard } from '../core/boards.js';
 import { makePart, PARTS } from '../core/parts.js';
@@ -17,7 +18,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const SET_KEY = 'circuitdeck:sandbox:settings';
 const BB = { x: 4.5, z: 0.6, w: 11, d: 6.6 };
 const BOARD_POS = { pi5: new THREE.Vector3(-6.5, 0, 0), esp32: new THREE.Vector3(-4.2, 0, 0.6) };
-const BOARD_TOP = 0.16;
+const BOARD_TOP = PI.t; // the Pi 5's PCB top (only the Pi takes board-mounted parts)
 const FIXED = { cam3: [-6, 6.2], aikit: [-16.2, 0.6] }; // Pi-only parts that live off the breadboard
 const TABLE = new Set(['motor', 'battery', 'stepper', 'lamp', 'psu12', 'keypad', 'relay', 'drv8833', 'uln2003', 'cam3', 'aikit', 'epaper']);
 const PALETTE = ['#f0a53a', '#3d6fc4', '#2fa36b', '#8f45b8', '#e05a8a', '#1aa3b8', '#c9842b', '#6b7cff'];
@@ -45,7 +46,7 @@ const app = $('#app');
 startClock($('#clock-date'), $('#clock-time'));
 let stage = null;
 createFit(app, () => stage?.resize());
-stage = createStage({ canvas: $('#board-canvas'), tagsEl: $('#tags'), leadersEl: $('#leaders'), tipEl: $('#tip'), viewbar: $('#viewbar') });
+stage = createStage({ canvas: $('#board-canvas'), tagsEl: $('#tags'), leadersEl: $('#leaders'), tipEl: $('#tip'), viewbar: $('#viewbar'), rigEl: $('#rig') });
 const cc = codeCard($('.code-card'), { onRun: start, onStop: () => stop(true), consoleTitle: 'Terminal' });
 const TAB_LABELS = ['Circuit', 'Wiring', 'Checks', 'Parts list'];
 document.querySelectorAll('.info-card [role=tab]').forEach((b, i) => { b.textContent = TAB_LABELS[i]; });
@@ -222,9 +223,9 @@ function changed({ rebuild = true, keepCam = true } = {}) {
   cc.setCode(genOut.code, genOut.lang);
   $('.code-card header h2').textContent = `Generated code · ${genOut.file}`;
   if (rebuild) {
-    const cam = keepCam ? { pos: stage.camera.position.clone(), target: stage.controls.target.clone() } : null;
+    const cam = keepCam ? stage.getView() : null;
     buildScene();
-    if (cam) { stage.camera.position.copy(cam.pos); stage.controls.target.copy(cam.target); stage.controls.update(); }
+    if (cam) { stage.setView(cam); }
   }
   renderPanel();
   info.show(info.current);
@@ -244,7 +245,7 @@ function load(c, { frame = true } = {}) {
   notice = '';
   insp.hide();
   changed({ keepCam: false });
-  if (frame) stage.frame([stage.content, stage.wires], { zoom: 0.82 });
+  if (frame) stage.frame([stage.content, stage.wires], { fill: 0.7 });
   cc.clear(); cc.closeConsole();
 }
 function loadTemplate(id) {
@@ -317,7 +318,7 @@ function setBoard(to) {
   notice = `Switched to the ${BOARDS[to].name}.${dropped.length ? ` Removed ${dropped.map((p) => PARTS[p.type].name).join(', ')} (Pi 5 only).` : ''}${lost ? ` Dropped ${lost} wire${lost > 1 ? 's' : ''} that had no matching pin.` : ''} Power and ground wires moved to the nearest equivalent pins — run the checks again.`;
   pending = null;
   changed({ keepCam: false });
-  stage.frame([stage.content, stage.wires], { zoom: 0.82 });
+  stage.frame([stage.content, stage.wires], { fill: 0.7 });
 }
 
 // ------------------------------------------------------------------ picking + inspector

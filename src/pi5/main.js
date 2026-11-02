@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { createFit, startClock, storeGet, storeSet, esc } from '../core/layout.js';
 import { createStage } from '../core/stage.js';
+import { PI, PI5_LAYOUT } from '../core/pi5model.js';
 import { sfx, isSoundOn, setSound } from '../core/sound.js';
 import { buildPi5, buildBreadboard, PI_PIN_NUMBER, PI_ALT } from '../core/boards.js';
 import { makePart, drawScreen, PARTS } from '../core/parts.js';
@@ -15,7 +16,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const DONE_KEY = 'circuitdeck:pi5:done';
 const SET_KEY = 'circuitdeck:pi5:settings';
 const PI_POS = new THREE.Vector3(-6.5, 0, 0);
-const PI_TOP = 0.16; // top face of the Pi's PCB (PI.t in boards.js)
+const PI_TOP = PI.t; // top face of the Pi's PCB
 const PALETTE = ['#f0a53a', '#3d6fc4', '#2fa36b', '#8f45b8', '#e05a8a', '#1aa3b8', '#c9842b', '#6b7cff'];
 const PIN_COLORS = { '5V': '#d83a34', '3V3': '#f08a24', GND: '#2f3547' };
 const STOP = Symbol('stop');
@@ -39,7 +40,7 @@ startClock($('#clock-date'), $('#clock-time'));
 
 let stage = null;
 createFit(app, () => stage?.resize());
-stage = createStage({ canvas: $('#board-canvas'), tagsEl: $('#tags'), leadersEl: $('#leaders'), tipEl: $('#tip'), viewbar: $('#viewbar') });
+stage = createStage({ canvas: $('#board-canvas'), tagsEl: $('#tags'), leadersEl: $('#leaders'), tipEl: $('#tip'), viewbar: $('#viewbar'), rigEl: $('#rig') });
 const cc = codeCard($('.code-card'), { onRun: start, onStop: () => stop(true), consoleTitle: 'Terminal' });
 const info = tabs($('.info-card'), renderTab);
 const fly = flyout($('#flyout'), $('.sidebar'));
@@ -133,7 +134,26 @@ function buildScene(p) {
   }
   pi.resetPins();
   // tags
-  const tags = [{ anchor: worldOf(pi.group, new THREE.Vector3(1.5, 1.4, 0.6)), label: 'Raspberry Pi 5', color: '#c51a4a', onClick: (e) => inspectAt(pi.group.userData.info || { title: 'Raspberry Pi 5', desc: 'BCM2712 quad-core Arm Cortex-A76 @ 2.4 GHz, with the RP1 I/O chip handling GPIO, USB and Ethernet.', rows: [['CPU', '4 × Cortex-A76 @ 2.4 GHz'], ['Power', '5 V / 5 A USB-C (27 W)'], ['GPIO', '3.3 V logic']] }, e) }];
+  // the tour: ESP32-style callout cards round the bare board
+  const tour = p.noBreadboard && !p.parts.length;
+  const T = PI.t, HW = PI.w / 2, HD = PI.d / 2;
+  const infoOf = (title) => { let hit = null; pi.group.traverse((o) => { if (!hit && o.userData.info?.title?.startsWith(title)) hit = o.userData.info; }); return hit; };
+  const C = (title, icon, body, at, x, y, find) => ({ title, icon, body, x, y, w: 226, anchor: worldOf(pi.group, new THREE.Vector3(...at)), onClick: (e) => { const d = infoOf(find); if (d) inspectAt(d, e); } });
+  const compact = document.documentElement.classList.contains('compact');
+  const PHONE_TAGS = ['GPIO Header', 'BCM2712 SoC', 'USB-C Power', 'USB 3.0', 'Camera / Display']; // phones show tags only; keep them from piling up
+  stage.setCallouts(tour ? [
+    C('GPIO Header', 'pins', '40 pins: GPIO,<br />3.3 V, 5 V, ground.', [-1.1, T + 0.9, PI5_LAYOUT.header.rowOdd - 0.13], -240, -420, '40-pin'),
+    C('BCM2712 SoC', 'chip', 'Four 2.4 GHz<br />Cortex-A76 cores.', [PI5_LAYOUT.soc[0], T + 0.24, PI5_LAYOUT.soc[1]], -505, -330, 'BCM2712'),
+    C('LPDDR4X RAM', 'memory', '1 to 16 GB of fast<br />working memory.', [PI5_LAYOUT.ram[0], T + 0.2, PI5_LAYOUT.ram[1]], 40, -420, 'LPDDR4X'),
+    C('Micro-HDMI', 'hdmi', 'Two 4K60 screens<br />at once.', [PI5_LAYOUT.hdmi[0], T + 0.3, HD + 0.05], -510, -85, 'Micro'),
+    C('USB-C Power', 'bolt', '5 V / 5 A in, from<br />a USB-PD supply.', [PI5_LAYOUT.usbc, T + 0.3, HD + 0.05], -505, -195, 'USB-C'),
+    C('Fan', 'fan', 'Header for the<br />Active Cooler.', [PI5_LAYOUT.fan[0], T + 0.25, PI5_LAYOUT.fan[1]], 285, -330, 'Fan'),
+    C('RP1 I/O', 'io', 'GPIO, USB, Ethernet<br />and cameras.', [PI5_LAYOUT.rp1[0], T + 0.18, PI5_LAYOUT.rp1[1]], 40, 190, 'RP1'),
+    C('USB 3.0', 'usb', 'Two 5 Gbps ports,<br />plus two USB 2.0.', [HW + 0.2, T + 1.2, PI5_LAYOUT.usb3], 285, -180, 'USB 3.0'),
+    C('Ethernet', 'ethernet', 'Gigabit wired<br />networking.', [HW + 0.2, T + 1.1, PI5_LAYOUT.eth], 296, -20, 'Gigabit Ethernet'),
+    C('Camera / Display', 'camera', 'Two MIPI ports for<br />cameras or screens.', [PI5_LAYOUT.cam0[0], T + 0.12, PI5_LAYOUT.cam0[1]], -250, 190, 'CAM/DISP'),
+  ].filter((c) => !compact || PHONE_TAGS.includes(c.title)) : []);
+  const tags = tour ? [] : [{ anchor: worldOf(pi.group, new THREE.Vector3(1.5, 1.4, 0.6)), label: 'Raspberry Pi 5', color: '#c51a4a', onClick: (e) => inspectAt(pi.group.userData.info || { title: 'Raspberry Pi 5', desc: 'BCM2712 quad-core Arm Cortex-A76 @ 2.4 GHz, with the RP1 I/O chip handling GPIO, USB and Ethernet.', rows: [['CPU', '4 × Cortex-A76 @ 2.4 GHz'], ['Power', '5 V / 5 A USB-C (27 W)'], ['GPIO', '3.3 V logic']] }, e) }];
   let k = 0;
   for (const part of p.parts) {
     const inst = insts[part.id];
@@ -143,10 +163,10 @@ function buildScene(p) {
   }
   stage.setTags(tags);
   stage.setTagsVisible(settings.labels);
-  tags.forEach((t, i) => { if (i) tagByPart[p.parts.find((x) => x.label === t.label)?.id] = t; });
+  tags.forEach((t, i) => { if (i || tour) tagByPart[p.parts.find((x) => x.label === t.label)?.id] = t; });
   stage.addTick((t) => drawPreview(t));
-  stage.renderer.toneMappingExposure = 1.05;
-  stage.frame([stage.content, stage.wires], { zoom: p.noBreadboard ? 0.8 : 0.78 });
+  stage.setAmbient(1);
+  stage.frame([stage.content, stage.wires], tour ? (compact ? { fill: 0.8 } : { fill: 0.58, shift: [10, 66] }) : { fill: p.noBreadboard ? 0.5 : 0.62 });
 }
 
 // ------------------------------------------------------------------ inspector
@@ -279,7 +299,7 @@ async function start() {
     preview(fn) { previewFn = fn; },
     beep(on) { if (!token.stopped) beep(on); },
     click() { if (!token.stopped) click(); },
-    ambient(k) { stage.renderer.toneMappingExposure = 0.45 + 0.6 * Math.max(0, Math.min(1, k)); },
+    ambient(k) { stage.setAmbient((0.45 + 0.6 * Math.max(0, Math.min(1, k))) / 1.05); },
   };
   const credit = setTimeout(() => { if (run === token) markDone(p.id); }, 2500);
   try {
@@ -305,7 +325,7 @@ function stop(user) {
 function resetStates() {
   sfx.stopAll();
   previewFn = null; drawPreview(0, true);
-  stage.renderer.toneMappingExposure = 1.05;
+  stage.setAmbient(1);
   for (const [id, inst] of Object.entries(insts)) {
     if (inst.type === 'epaper') continue; // e-paper keeps its picture without power — that is the point
     const s = {};
@@ -413,9 +433,9 @@ function togglePart(id, on) {
 function rebuild() {
   const was = !!run;
   stop(false);
-  const cam = { pos: stage.camera.position.clone(), target: stage.controls.target.clone() };
+  const cam = stage.getView();
   buildScene(project);
-  stage.camera.position.copy(cam.pos); stage.controls.target.copy(cam.target); stage.controls.update();
+  stage.setView(cam);
   if (was) cc.print('Circuit changed — press Run again.', 'cd-dim');
 }
 
