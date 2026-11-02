@@ -128,3 +128,4 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 ### M8 resume — tests (Nov 3, ~3:40 AM IST)
 - tests/m8-ai.mjs: 9 checks with /api/ai mocked (api no-key, tutor not-configured, editor AI help, failure toast→hint, Recommended next, TinyML 6 projects + gallery filter, sandbox Explain with AI, ML camera fake webcam, QR via QR_Y4M).
 - ai.js: skip POST when GET already said not configured (no console 503); own-track rec bonus 25→40.
+- (4:2x AM IST) m8-ai.mjs 9/9 (ml-camera/ml-qr re-run after wait fix), pi-all light+dark 0 FAIL, sb-test OK. Gallery totals in smoke.mjs / m9-regression.mjs updated 61→67 (6 TinyML items).

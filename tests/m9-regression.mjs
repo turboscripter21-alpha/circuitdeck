@@ -264,7 +264,7 @@ await t('m7', async () => {
 await t('m8', async () => {
   const a = await gal('/gallery/?track=bogus&level=nonsense'); await a.c.close();
   const bb = await gal('/gallery/?level=beginner&track=PI5'); await bb.c.close();
-  return { bogus: a.r, lower: bb.r, pass: a.r.count === '61 of 61' && a.r.pressed.length === 2 && +bb.r.count.split(' ')[0] > 0 && bb.r.pressed.some((x) => /beginner/i.test(x)) && bb.r.pressed.some((x) => /pi/i.test(x)) };
+  return { bogus: a.r, lower: bb.r, pass: a.r.count === '67 of 67' && a.r.pressed.length === 2 && +bb.r.count.split(' ')[0] > 0 && bb.r.pressed.some((x) => /beginner/i.test(x)) && bb.r.pressed.some((x) => /pi/i.test(x)) };
 });
 await t('m9', async () => {
   const c = await ctx(); const p = await page(c, 'm9'); await p.goto(BASE + '/gallery/'); await p.waitForTimeout(1200);

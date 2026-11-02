@@ -62,7 +62,7 @@ if(PART==='all'||PART==='gal'){ const c=await ctx(); const p=await c.newPage(); 
   await T('gallery',async()=>{await p.goto(BASE+'/gallery/'); await p.waitForTimeout(1200); const cnt=()=>p.evaluate(()=>document.querySelectorAll('#g-grid .card:not([hidden])').length);
     const all=await cnt(); await p.click('[data-filter=track] [data-v=pi5]'); await p.waitForTimeout(300); const pi=await cnt();
     await p.click('[data-filter=level] [data-v=Advanced]'); await p.waitForTimeout(300); const piAdv=await cnt(); await p.screenshot({path:O+'smoke-gallery-filter.png'});
-    return {pass:all===61&&pi===29&&piAdv>0&&piAdv<pi, all, pi5:pi, pi5Advanced:piAdv, url:p.url()};});
+    return {pass:all===67&&pi===29&&piAdv>0&&piAdv<pi, all, pi5:pi, pi5Advanced:piAdv, url:p.url()};});
   await c.close();}
 if(PART==='all'||PART==='theme'){ R.theme={};
   for(const [name,path] of [['home','/#blink'],['pi5','/pi5/#traffic'],['sandbox','/sandbox/#t=robot-car'],['gallery','/gallery/']]){
