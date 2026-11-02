@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { createFit, startClock, storeGet, storeSet, esc } from '../core/layout.js';
 import { createStage } from '../core/stage.js';
+import { sfx, isSoundOn, setSound } from '../core/sound.js';
 import { buildPi5, buildEsp32, buildBreadboard } from '../core/boards.js';
 import { makePart, PARTS } from '../core/parts.js';
 import { ICONS, codeCard, tabs, flyout, inspector, lessonStrip, progress } from '../core/ui.js';
@@ -24,7 +25,8 @@ const RAIL_COLORS = { power5: '#d83a34', power3: '#f08a24', gnd: '#2f3547' };
 const ROLE_DOT = { gnd: 0x2f3547, vcc: 0xd83a34, v5: 0xd83a34, v3: 0xf08a24 };
 
 // ------------------------------------------------------------------ state
-const settings = { labels: true, sound: true, ...storeGet(SET_KEY, {}) };
+const settings = { labels: true, ...storeGet(SET_KEY, {}) };
+delete settings.sound;
 let circ = null;        // the circuit (plain JSON, see circuit.js)
 let result = { issues: [], conn: null };
 let insts = {};         // part id -> part instance
@@ -154,6 +156,7 @@ function paintDots() {
 function buildScene() {
   stage.clearTicks();
   stage.clear();
+  sfx.stopAll();
   insts = {}; dots = {};
   board = circ.board === 'pi5' ? buildPi5() : buildEsp32();
   board.group.position.copy(BOARD_POS[circ.board]);
@@ -518,7 +521,7 @@ panel.addEventListener('input', (e) => {
 });
 panel.addEventListener('click', (e) => {
   const k = e.target.closest('[data-key]');
-  if (k) { inputs.__keys.push(k.dataset.key); click(); }
+  if (k) { inputs.__keys.push(k.dataset.key); sfx.key(); }
 });
 panel.addEventListener('pointerdown', (e) => {
   const b = e.target.closest('button[data-input]');
@@ -533,21 +536,10 @@ panel.addEventListener('keydown', (e) => {
 });
 
 // ------------------------------------------------------------------ audio
-let actx = null, osc = null;
-function audio() { if (!settings.sound) return null; try { actx ??= new AudioContext(); } catch { return null; } return actx; }
-function beep(on) {
-  const a = audio();
-  if (on && a && !osc) {
-    osc = a.createOscillator(); const g = a.createGain(); g.gain.value = 0.035;
-    osc.type = 'square'; osc.frequency.value = 2300; osc.connect(g).connect(a.destination); osc.start();
-  } else if (!on && osc) { osc.stop(); osc = null; }
-}
-function click() {
-  const a = audio(); if (!a) return;
-  const o = a.createOscillator(), g = a.createGain();
-  g.gain.setValueAtTime(0.05, a.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.05);
-  o.frequency.value = 900; o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + 0.06);
-}
+// Part sounds (buzzers, relays, servos, motors, steppers, fans, buttons) come from
+// core/sound.js reacting to part state changes; these two are kept for the sim API.
+function beep(on) { if (!on) return; }
+function click() { sfx.shutter(); }
 
 // ------------------------------------------------------------------ run / stop
 function start() {
@@ -566,7 +558,7 @@ function start() {
   for (const w of result.issues.filter((i) => i.sev === 'warn')) cc.print(`! ${w.msg}`, 'cd-warn');
   cc.setRunning(true);
   try {
-    run = runSim({ c: circ, conn: result.conn, insts: Object.assign(Object.create(null), insts, { __click: click }), inputs, print: (t, cls) => cc.print(t, cls), beep: (on) => beep(on), mark: (n) => cc.mark(n), codeLines: genOut.code.split('\n') });
+    run = runSim({ c: circ, conn: result.conn, insts: Object.assign(Object.create(null), insts, { __shutter: click, __sfx: sfx }), inputs, print: (t, cls) => cc.print(t, cls), beep: (on) => beep(on), mark: (n) => cc.mark(n), codeLines: genOut.code.split('\n') });
   } catch (err) {
     console.error(err);
     run = null; cc.setRunning(false); resetStates();
@@ -582,7 +574,7 @@ function stop(user) {
   resetStates();
 }
 function resetStates() {
-  beep(false);
+  sfx.stopAll();
   for (const [id, inst] of Object.entries(insts)) {
     if (inst.type === 'epaper' || !inst.state) continue;
     const s = {};
@@ -610,7 +602,7 @@ function openFly(kind, link) {
   } else if (kind === 'settings') {
     fly.open('settings', `${flyHead('Settings')}<ul class="fly-list cd-parts">
       <li><label class="switch cd-row"><input type="checkbox" data-set="labels" ${settings.labels ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Part labels</b><small>Show the tags over the 3D view</small></span></label></li>
-      <li><label class="switch cd-row"><input type="checkbox" data-set="sound" ${settings.sound ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Sound</b><small>Buzzers and clicks while running</small></span></label></li>
+      <li><label class="switch cd-row"><input type="checkbox" data-set="sound" ${isSoundOn() ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Sound</b><small>Buzzers and clicks while running</small></span></label></li>
       <li><label class="switch cd-row"><input type="checkbox" data-set="dark" ${document.documentElement.dataset.theme === 'dark' ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Dark theme</b><small>Also in the header (sun/moon)</small></span></label></li>
       </ul>`, link);
   } else if (kind === 'reference') {
@@ -647,7 +639,7 @@ $('#flyout').addEventListener('input', (e) => {
 $('#flyout').addEventListener('change', (e) => {
   const c = e.target;
   if (c.dataset.set === 'labels') { settings.labels = c.checked; stage.setTagsVisible(c.checked); storeSet(SET_KEY, settings); }
-  if (c.dataset.set === 'sound') { settings.sound = c.checked; if (!c.checked) beep(false); storeSet(SET_KEY, settings); }
+  if (c.dataset.set === 'sound') { setSound(c.checked); }
   if (c.dataset.set === 'dark') window.CircuitDeck?.setTheme(c.checked ? 'dark' : 'light');
 });
 addEventListener('keydown', (e) => {

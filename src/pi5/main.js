@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { createFit, startClock, storeGet, storeSet, esc } from '../core/layout.js';
 import { createStage } from '../core/stage.js';
+import { sfx, isSoundOn, setSound } from '../core/sound.js';
 import { buildPi5, buildBreadboard, PI_PIN_NUMBER, PI_ALT } from '../core/boards.js';
 import { makePart, drawScreen, PARTS } from '../core/parts.js';
 import { ICONS, codeCard, tabs, flyout, inspector, lessonStrip, progress } from '../core/ui.js';
@@ -21,7 +22,8 @@ const STOP = Symbol('stop');
 
 // ------------------------------------------------------------------ state
 const done = new Set(storeGet(DONE_KEY, []).filter((id) => byId[id]));
-const settings = { labels: true, sound: true, ...storeGet(SET_KEY, {}) };
+const settings = { labels: true, ...storeGet(SET_KEY, {}) };
+delete settings.sound;
 let project = null;          // the project on screen
 const removed = new Set();   // part ids taken out in Components (this project only)
 let insts = {};              // part id -> part instance
@@ -79,6 +81,7 @@ const labelOf = (id) => project.parts.find((p) => p.id === id)?.label || id;
 function buildScene(p) {
   stage.clearTicks();
   stage.clear();
+  sfx.stopAll();
   insts = {}; tagByPart = {}; wireColors = {};
   pi = buildPi5();
   pi.group.position.copy(PI_POS);
@@ -238,21 +241,10 @@ function drawPreview(t, force) {
 }
 
 // ------------------------------------------------------------------ audio
-let actx = null, osc = null;
-function audio() { if (!settings.sound) return null; try { actx ??= new AudioContext(); } catch { return null; } return actx; }
-function beep(on) {
-  const a = audio();
-  if (on && a && !osc) {
-    osc = a.createOscillator(); const g = a.createGain(); g.gain.value = 0.035;
-    osc.type = 'square'; osc.frequency.value = 2300; osc.connect(g).connect(a.destination); osc.start();
-  } else if (!on && osc) { osc.stop(); osc = null; }
-}
-function click() {
-  const a = audio(); if (!a) return;
-  const o = a.createOscillator(), g = a.createGain();
-  g.gain.setValueAtTime(0.05, a.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.05);
-  o.frequency.value = 900; o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + 0.06);
-}
+// Part sounds (buzzers, relays, servos, motors, steppers, fans, buttons) come from
+// core/sound.js reacting to part state changes; these two are kept for the sim API.
+function beep(on) { if (!on) return; }
+function click() { sfx.shutter(); }
 
 // ------------------------------------------------------------------ simulation
 async function start() {
@@ -311,7 +303,7 @@ function stop(user) {
   resetStates();
 }
 function resetStates() {
-  beep(false);
+  sfx.stopAll();
   previewFn = null; drawPreview(0, true);
   stage.renderer.toneMappingExposure = 1.05;
   for (const [id, inst] of Object.entries(insts)) {
@@ -382,7 +374,7 @@ function openFly(kind, link) {
   } else if (kind === 'settings') {
     fly.open('settings', `${flyHead('Settings')}<ul class="fly-list cd-parts">
       <li><label class="switch cd-row"><input type="checkbox" data-set="labels" ${settings.labels ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Part labels</b><small>Show the tags over the 3D view</small></span></label></li>
-      <li><label class="switch cd-row"><input type="checkbox" data-set="sound" ${settings.sound ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Sound</b><small>Buzzers and clicks while running</small></span></label></li>
+      <li><label class="switch cd-row"><input type="checkbox" data-set="sound" ${isSoundOn() ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Sound</b><small>Buzzers and clicks while running</small></span></label></li>
       <li><label class="switch cd-row"><input type="checkbox" data-set="dark" ${document.documentElement.dataset.theme === 'dark' ? 'checked' : ''}><span class="switch-track"><span></span></span><span class="fly-text"><b>Dark theme</b><small>Also in the header (sun/moon)</small></span></label></li>
       </ul><button class="cd-btn cd-danger" data-reset>Reset Pi 5 progress</button>`, link);
   } else if (kind === 'reference') {
@@ -411,7 +403,7 @@ $('#flyout').addEventListener('change', (e) => {
   const c = e.target;
   if (c.dataset.part) { togglePart(c.dataset.part, c.checked); const s = $('#flyout header span'); if (s) s.textContent = `${project.parts.length - removed.size}/${project.parts.length} in use`; }
   if (c.dataset.set === 'labels') { settings.labels = c.checked; stage.setTagsVisible(c.checked); storeSet(SET_KEY, settings); }
-  if (c.dataset.set === 'sound') { settings.sound = c.checked; if (!c.checked) beep(false); storeSet(SET_KEY, settings); }
+  if (c.dataset.set === 'sound') { setSound(c.checked); }
   if (c.dataset.set === 'dark') window.CircuitDeck?.setTheme(c.checked ? 'dark' : 'light');
 });
 function togglePart(id, on) {

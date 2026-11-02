@@ -50,7 +50,7 @@ export function runSim({ c, conn, insts, inputs, print, beep, mark, codeLines })
         if (key === '*') { st.entered = ''; print('Cleared'); }
         else { st.entered += key; print(c.board === 'pi5' ? `Key ${key} → ${'*'.repeat(st.entered.length)}` : `Key ${key}`); }
         if (st.entered.length === T.code.length) {
-          if (st.entered === T.code) { print('Unlocked!', 'cd-ok'); st.unlock = T.unlockTicks; } else { print('Wrong code', 'cd-err'); st.wrong = 12; }
+          if (st.entered === T.code) { print('Unlocked!', 'cd-ok'); st.unlock = T.unlockTicks; insts.__sfx?.accept(); } else { print('Wrong code', 'cd-err'); st.wrong = 12; insts.__sfx?.deny(); }
           st.entered = '';
         }
       }
@@ -61,7 +61,7 @@ export function runSim({ c, conn, insts, inputs, print, beep, mark, codeLines })
       st.labels = s === 'nothing' ? [] : [s];
       if (st.labels.length) print(`Detected: ${st.labels.join(', ')}`);
       for (const a of R.ais) set(a, { busy: true });
-    } else if (R.cams.length && !R.ais.length && t % 50 === 0) print(`Saved capture-${t / 50}.jpg`);
+    } else if (R.cams.length && !R.ais.length && t % 50 === 0) { print(`Saved capture-${t / 50}.jpg`); insts.__shutter?.(); }
     if (R.coolers.length && t % T.printEvery === 0) {
       const cpu = R.ais.length ? 61.5 + Math.sin(t / 30) * 2 : 47 + Math.sin(t / 40);
       const rpm = cpu > 60 ? 4300 : cpu > 50 ? 2700 : 1400;
@@ -118,7 +118,7 @@ export function runSim({ c, conn, insts, inputs, print, beep, mark, codeLines })
       const on = { trigger: trig, dark: cond.dark, toggle: Math.floor(t / 20) % 2 === 1 }[R.relayRule];
       set(R.relay, { on: !!on });
       if (R.lampOnRelay) set(R.lampOnRelay, { on: !!on });
-      if (!!on !== st.relay) { st.relay = !!on; insts.__click?.(); }
+      if (!!on !== st.relay) { st.relay = !!on; }
     }
     for (const p of R.rings) {
       if (R.ringButton) { const pr = pressed(R.buttons[0]); if (pr && !st.wasPressed) { st.ringMode = (st.ringMode + 1) % 3; print(c.board === 'pi5' ? `Mode ${['rainbow', 'chase', 'warm'][st.ringMode]}` : `Mode ${st.ringMode}`); } st.wasPressed = pr; }

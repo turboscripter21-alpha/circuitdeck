@@ -49,12 +49,16 @@
       <button type="button" class="cd-menu" aria-label="Tracks menu" aria-expanded="false" aria-controls="cd-tracks">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
+      ${SOUND_PAGES.includes(here) ? `<button type="button" class="cd-theme cd-sound" data-cd-sound>
+        <svg class="spk-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.4a8 8 0 0 1 0 11.2"/></svg>
+        <svg class="spk-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+      </button>` : ''}
       <button type="button" class="cd-theme" data-cd-theme>
         <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
         <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.3 8.3 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z"/></svg>
       </button>`;
     host.appendChild(wrap);
-    btn = wrap.querySelector('.cd-theme');
+    btn = wrap.querySelector('[data-cd-theme]');
     btn.addEventListener('click', () => setTheme(getTheme() === 'dark' ? 'light' : 'dark'));
     const menu = wrap.querySelector('.cd-menu');
     menu.addEventListener('click', (e) => {
@@ -68,7 +72,29 @@
     // keyboard shortcuts of the ESP32 track must not fire while typing/pressing here
     wrap.addEventListener('keydown', (e) => e.stopPropagation());
     syncButton();
+    snd = wrap.querySelector('[data-cd-sound]');
+    if (snd) snd.addEventListener('click', () => setSound(!getSound()));
+    syncSound();
   }
+  // sound on/off (pages with simulated parts); the audio itself lives in src/core/sound.js
+  const SKEY = 'circuitdeck:sound';
+  const SOUND_PAGES = ['pi5', 'sandbox'];
+  let snd;
+  const getSound = () => { try { return localStorage.getItem(SKEY) !== '0'; } catch { return true; } };
+  function setSound(on) {
+    try { localStorage.setItem(SKEY, on ? '1' : '0'); } catch {}
+    window.dispatchEvent(new CustomEvent('cd-sound', { detail: { on: !!on } }));
+  }
+  function syncSound() {
+    if (!snd) return;
+    const on = getSound();
+    snd.classList.toggle('is-muted', !on);
+    snd.setAttribute('aria-pressed', String(!on));
+    snd.title = on ? 'Mute sounds' : 'Unmute sounds';
+    snd.setAttribute('aria-label', snd.title);
+    document.querySelectorAll('input[data-set="sound"]').forEach((c) => { c.checked = on; });
+  }
+  window.addEventListener('cd-sound', syncSound);
   window.CircuitDeck = { getTheme, setTheme };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();

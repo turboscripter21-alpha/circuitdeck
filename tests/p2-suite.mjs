@@ -1,4 +1,4 @@
-// Phase 2 suite: ESP32 regression (20 lessons) + all pages x light/dark x desktop/mobile, credit, theme persistence, overflow, console errors.
+// Phase 2 suite: ESP32 regression (20 lessons) + all pages x light/dark x desktop/mobile, no credit link (removed with the author's permission), theme persistence, overflow, console errors.
 import { chromium } from 'playwright'; import fs from 'fs';
 const BASE=process.env.BASE||'http://127.0.0.1:8080'; const LOCAL=BASE.includes('127.0.0.1');
 const O='/workspace/learn-esp32-local/_compare/phase2/'+(process.env.TAG||''); fs.mkdirSync(O+'theme',{recursive:true});
@@ -21,7 +21,7 @@ if(PART==='all'||PART==='esp'){
       await p.locator('.btn-run').click(); await p.waitForTimeout(3500);
       r.status=(await p.locator('.console-status').innerText()).trim(); r.serial=(await p.locator('.console-lines').innerText()).trim().slice(-80).replace(/\s+/g,' ');
       if(['board','blink','radar'].includes(id)) await p.screenshot({path:O+`esp32-${id}.png`});
-      r.pass=r.title.includes('CircuitDeck')&&!!r.active&&r.canvas&&r.hash==='#'+id&&/run/i.test(r.status)&&r.serial.length>0&&r.credit===1&&(!r.tabs||Object.values(r.tabs).every(n=>n>20));
+      r.pass=r.title.includes('CircuitDeck')&&!!r.active&&r.canvas&&r.hash==='#'+id&&/run/i.test(r.status)&&r.serial.length>0&&r.credit===0&&(!r.tabs||Object.values(r.tabs).every(n=>n>20));
       r.ms=Date.now()-t0; R.esp32[id]=r;}catch(e){R.esp32[id]={pass:false,error:String(e.message).slice(0,200)};}
     save(); console.log(id,R.esp32[id].pass,R.esp32[id].ms); await p.close();}
   await c.close();
@@ -38,7 +38,7 @@ if(PART==='all'||PART==='pages'){
       for(const [name,path] of Object.entries(PAGES)){const p=await c.newPage(); const tag=`${name}/${theme}/${vpName}`; hook(p,tag);
         try{await p.goto(BASE+path); if(name==='home') await ready(p); else await p.waitForTimeout(name==='gallery'?1500:4000);
           const r=await pageCheck(p); const f=O+`theme/${name}-${theme}-${vpName}.png`; await p.screenshot({path:f});
-          r.pass=r.theme===theme&&r.title.includes('CircuitDeck')&&r.credits.length===1&&r.credits[0]==='Based on Learn ESP32 by Dilum Sanjaya'&&r.overflowX<=1&&!r.bodyText&&!r.learnEsp32Visible; r.shot=f; R.pages[tag]=r;}catch(e){R.pages[tag]={pass:false,error:String(e.message).slice(0,200)};}
+          r.pass=r.theme===theme&&r.title.includes('CircuitDeck')&&r.credits.length===0&&r.overflowX<=1&&!r.bodyText&&!r.learnEsp32Visible; r.shot=f; R.pages[tag]=r;}catch(e){R.pages[tag]={pass:false,error:String(e.message).slice(0,200)};}
         save(); console.log(tag,R.pages[tag].pass,JSON.stringify(R.pages[tag]).slice(0,220)); await p.close();}
       await c.close();}}
   // persistence: default light, toggle on gallery -> persists across pages and reloads

@@ -60,8 +60,6 @@ html[data-theme=dark] .tag.t-esp32{background:#1d2c40;color:#8fb8f2}html[data-th
 .card .done svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .g-empty{padding:40px 0;text-align:center;color:var(--muted)}
 .g-foot{padding:16px clamp(16px,3vw,36px) 22px;display:flex;justify-content:center}
-.g-credit{font-size:13px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line-strong)}
-.g-credit:hover{color:var(--accent-deep)}
 @media (max-width:820px){.g-tracks{gap:8px}.g-track{padding:10px 12px}.g-track b{font-size:16px}.g-track span{font-size:12.5px}.brand-text p{letter-spacing:.18em}.g-search{margin-left:0;width:100%}.g-search input{flex:1;max-width:none}.brand-text h1{font-size:26px}}
 @media (max-width:480px){.g-grid{grid-template-columns:1fr 1fr;gap:10px}.card h3{font-size:16px}.card p{display:none}.card-body{padding:9px 10px 11px}.g-hero h2{font-size:28px}}
 .card[hidden],.g-empty[hidden]{display:none}

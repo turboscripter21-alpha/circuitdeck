@@ -2,6 +2,7 @@
 // click-to-inspect picking, and DOM tags/hotspots that follow 3D anchors.
 import * as THREE from 'three';
 import { OrbitControls } from '/vendor/three/OrbitControls.min.js';
+import { RoomEnvironment } from '/vendor/three/RoomEnvironment.js';
 import { wire as makeWire, ribbon as makeRibbon } from './kit.js';
 
 const isDark = () => document.documentElement.dataset.theme === 'dark';
@@ -27,8 +28,18 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar }) {
   controls.maxPolarAngle = Math.PI * 0.47;
   controls.screenSpacePanning = true;
 
+  // image-based light (same room environment the ESP32 track uses) gives metal
+  // parts, chip lids and solder their reflections
+  try {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const room = new RoomEnvironment();
+    scene.environment = pmrem.fromScene(room, 0.04).texture;
+    scene.environmentIntensity = 0.4;
+    room.dispose?.(); pmrem.dispose();
+  } catch {}
+
   // lights
-  const hemi = new THREE.HemisphereLight(0xfff7ec, 0x8a7a66, 1.25);
+  const hemi = new THREE.HemisphereLight(0xfff7ec, 0x8a7a66, 1.05);
   scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xffffff, 2.1);
   sun.position.set(-14, 30, 18);
@@ -59,7 +70,7 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar }) {
     grid.position.y = -0.02;
     scene.add(grid);
     shadowMat.opacity = dark ? 0.32 : 0.16;
-    hemi.intensity = dark ? 1.05 : 1.25;
+    hemi.intensity = dark ? 0.9 : 1.05;
   }
   makeGrid();
   addEventListener('cd-theme', makeGrid);

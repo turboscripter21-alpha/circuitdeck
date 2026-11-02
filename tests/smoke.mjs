@@ -72,5 +72,5 @@ if(PART==='all'||PART==='theme'){ R.theme={};
       await p.reload(); await p.waitForTimeout(1500); const kept=(await th())[0]; await c.close(); return {pass:l[0]==='light'&&d[0]==='dark'&&l[1]!==d[1]&&kept==='dark',light:l,dark:d,afterReload:kept};});}}
 if(PART==='all'||PART==='mob'){ await T('mobile_home',async()=>{const c=await ctx({width:390,height:844},true); const p=await c.newPage(); hook(p,'mobile'); await p.goto(BASE+'/#board'); await ready(p);
   const r=await p.evaluate(()=>({overflowX:document.documentElement.scrollWidth-document.documentElement.clientWidth, credit:[...document.querySelectorAll('a[href*="DilumSanjaya"]')].filter(a=>a.getBoundingClientRect().width>0&&a.offsetParent).length, tracks:document.querySelectorAll('.cd-tracks a').length}));
-  await p.screenshot({path:O+'smoke-mobile-home.png'}); await c.close(); r.pass=r.overflowX<=1&&r.credit===1; return r;});}
+  await p.screenshot({path:O+'smoke-mobile-home.png'}); await c.close(); r.pass=r.overflowX<=1&&r.credit===0; return r;});}
 R.errorCount=errs.length; save(); console.log('ERRORS',errs.length,errs.slice(0,10)); await b.close();

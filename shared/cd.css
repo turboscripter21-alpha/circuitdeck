@@ -15,6 +15,9 @@
 .cd-theme .moon{display:none}
 html[data-theme=dark] .cd-theme .sun{display:none}
 html[data-theme=dark] .cd-theme .moon{display:block}
+.cd-sound .spk-off,.cd-sound.is-muted .spk-on{display:none}
+.cd-sound.is-muted .spk-off{display:block}
+html[data-theme=dark] .cd-sound .sun,html[data-theme=dark] .cd-sound .moon{display:none}
 .cd-menu{display:none}
 html.compact .cd-chrome{margin-left:auto;gap:8px}
 html.compact .cd-tracks a{padding:6px 9px;font-size:13px}
@@ -61,8 +64,6 @@ html[data-theme=dark] .seg button.is-on{color:#121821}
 html[data-theme=dark] .insp-row label,html[data-theme=dark] .insp-label{color:#c0c7d0}
 html[data-theme=dark] .code .param{color:#ffa060}
 html[data-theme=dark] .code .str{color:#80d18f}
-html[data-theme=dark] .credit-text small{color:#a0978a}
-html[data-theme=dark] a.credit:hover,html[data-theme=dark] .credit:hover{background:#222c38}
 html[data-theme=dark] .fly-reset{color:#ff8f7a}
 html[data-theme=dark] .side-desert .sand{fill:#5b4a35}
 html[data-theme=dark] .side-desert .hill{fill:#a86235}
@@ -78,3 +79,4 @@ html[data-theme=dark] .schematic-card{--card:#f6efe4;--card-soft:#f6efe4f2;--nav
 html[data-theme=dark] .schematic-card .sch-head h2{color:#0f2239}
 html[data-theme=dark] .loader:before{opacity:.35}
 @media (max-width:480px){html.compact .brand-text p{display:none}}
+

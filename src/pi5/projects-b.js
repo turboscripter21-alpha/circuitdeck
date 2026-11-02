@@ -425,7 +425,7 @@ pause()`,
         ctx.set('btn', { pressed: p });
         if (p && !last) {
           on = !on; ctx.at('relay.toggle()');
-          ctx.set('rl', { on }); ctx.set('lamp', { on }); ctx.click();
+          ctx.set('rl', { on }); ctx.set('lamp', { on });
           ctx.print(`Lamp ${on ? 'ON' : 'off'}`);
         }
         last = p;

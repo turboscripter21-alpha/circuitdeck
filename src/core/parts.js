@@ -11,6 +11,7 @@
 //   drv  – driver output terminal                      csi/pcie/fan – Pi 5 connectors
 import * as THREE from 'three';
 import { COLORS, mat, metal, box, cyl, slab, chip, decal, silk, canvasTexture, glowSprite } from './kit.js';
+import { react as soundReact } from './sound.js';
 
 const P = (n, role, extra = {}) => ({ n, role, ...extra });
 
@@ -642,7 +643,7 @@ export function makePart(type, opts = {}) {
   inst.type = type;
   inst.def = def;
   inst.state = {};
-  inst.set = (patch) => { Object.assign(inst.state, patch); inst.apply?.(inst.state); };
+  inst.set = (patch) => { const prev = { ...inst.state }; Object.assign(inst.state, patch); inst.apply?.(inst.state); soundReact(inst, prev, inst.state); };
   inst.group.traverse((o) => { if (o.isMesh) { o.castShadow = true; } });
   return inst;
 }
