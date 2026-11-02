@@ -480,7 +480,7 @@ while True:
     lede: 'The Pi 5 has two 4-lane MIPI connectors, each able to take a camera or a display. Camera Module 3 plugs into CAM/DISP 0 with the narrower Pi 5 cable, and Picamera2 captures a 12-megapixel photo.',
     features: [['eye', 'Autofocus and HDR camera'], ['code', 'Picamera2: configure, start, capture'], ['chip', 'Two CSI/DSI ports on Pi 5']],
     parts: CAMERA_PARTS,
-    wires: [['CAM0', 'cam.CSI']], noBreadboard: true, preview: true,
+    wires: [['CAM0', 'cam.CSI']], noBreadboard: true, preview: true, ml: 'objects',
     pinout: [['CAM/DISP 0', 'Camera ribbon', '22-pin, 0.5 mm pitch; contacts face the connector’s contacts.'], ['CAM/DISP 1', 'Free', 'A second camera or a DSI display.']],
     steps: ['Pi 5 connectors are smaller than older Pis’: you need a 22-to-15-pin cable (sold as the Pi 5 camera cable).', 'Check it works with <code>rpicam-hello</code>.', 'Picamera2 comes with Raspberry Pi OS; <code>autofocus_cycle()</code> runs one focus sweep on Camera Module 3.', 'Use <code>Preview.QTGL</code> on the desktop, or <code>Preview.NULL</code> over SSH.'],
     specs: [['Sensor', 'Sony IMX708, 11.9 MP'], ['Still', '4608 × 2592'], ['Video', '1080p50, 720p100'], ['Focus', 'Phase-detect autofocus'], ['Cable', 'Pi 5 FPC, 22-pin ↔ 15-pin']],
@@ -514,6 +514,8 @@ picam2.stop()`,
       ctx.at('picam2.autofocus_cycle()'); while (blur > 0) { blur -= 1; await ctx.sleep(110); }
       ctx.at('picam2.capture_file'); flash = 1; ctx.click(); await ctx.sleep(500);
       ctx.at('print("Saved'); ctx.print('Saved photo.jpg (4608 × 2592)', 'cd-ok');
+      const live = ctx.live();
+      if (live) { const seen = [...new Set(live.labels.map((l) => l.name))]; ctx.print(`Your webcam frame · MediaPipe sees: ${seen.length ? seen.join(', ') : 'nothing it knows'}`, 'cd-dim'); }
       ctx.at('picam2.stop()'); await ctx.sleep(300);
     },
   },
@@ -524,8 +526,8 @@ picam2.stop()`,
     lede: 'OpenCV’s built-in QR detector finds and decodes codes in each camera frame — no extra hardware. The same pipeline is the starting point for reading labels or number plates, which add an OCR step on top.',
     features: [['eye', 'Detect and decode in one call'], ['hand', 'Hold a code up to the camera in Inputs'], ['code', 'Frames as NumPy arrays from Picamera2']],
     parts: CAMERA_PARTS,
-    wires: [['CAM0', 'cam.CSI']], noBreadboard: true, preview: true,
-    inputs: [{ id: 'code', type: 'choice', label: 'Show the camera', options: ['nothing', 'https://www.raspberrypi.com', 'WIFI:S:Workshop;T:WPA;;', 'PART-4471-B'] }],
+    wires: [['CAM0', 'cam.CSI']], noBreadboard: true, preview: true, ml: 'qr',
+    inputs: [{ id: 'code', type: 'choice', scene: true, label: 'Show the camera', options: ['nothing', 'https://www.raspberrypi.com', 'WIFI:S:Workshop;T:WPA;;', 'PART-4471-B'] }],
     pinout: [['CAM/DISP 0', 'Camera Module 3', 'Pi 5 camera cable.']],
     steps: ['Install OpenCV with <code>sudo apt install python3-opencv</code>.', '<code>capture_array()</code> returns a frame as a NumPy array OpenCV can use directly.', '<code>detectAndDecode</code> returns the text (empty if none), the corner points and a rectified image.', 'Licence plates or labels: crop the region and run an OCR engine such as Tesseract — and respect local privacy rules when recording vehicles or people.'],
     specs: [['Resolution', '1280 × 720 RGB'], ['Library', 'OpenCV QRCodeDetector'], ['Rate', '≈ 10–20 fps on Pi 5'], ['Camera', 'Camera Module 3']],
@@ -563,9 +565,10 @@ while True:
       for (;;) {
         ctx.at('frame = picam2.capture_array()'); await ctx.sleep(90);
         ctx.at('text, points, _'); await ctx.sleep(90);
-        const code = ctx.input('code');
+        const live = ctx.live();
+        const code = live ? live.qr || 'nothing' : ctx.input('code');
         if (code !== shown) { shown = code; found = 0; }
-        if (code !== 'nothing') { found++; if (found === 3 && code !== last) { ctx.at('print("QR:"'); ctx.print(`QR: ${code}`); last = code; } }
+        if (code !== 'nothing') { found++; if (found === (live ? 1 : 3) && code !== last) { ctx.at('print("QR:"'); ctx.print(`QR: ${code}`); last = code; } }
       }
     },
   },
@@ -576,7 +579,7 @@ while True:
     lede: 'With the AI Kit, a Hailo-8L accelerator on the Pi 5’s PCIe connector runs a YOLOv8 pose model on every camera frame — 17 body keypoints per person, in real time, while the CPU stays free.',
     features: [['chip', 'Hailo-8L: 13 TOPS over PCIe'], ['eye', 'Keypoints for each person'], ['code', 'One rpicam-hello command']],
     parts: [...CAMERA_PARTS, ...AI_PARTS],
-    wires: [['CAM0', 'cam.CSI'], ['PCIE', 'ai.PCIe'], ['FAN', 'cooler.FAN', { color: 0x2f3547, radius: 0.04 }]], noBreadboard: true, preview: true, lang: 'sh',
+    wires: [['CAM0', 'cam.CSI'], ['PCIE', 'ai.PCIe'], ['FAN', 'cooler.FAN', { color: 0x2f3547, radius: 0.04 }]], noBreadboard: true, preview: true, ml: 'pose', lang: 'sh',
     pinout: [['PCIe', 'AI Kit ribbon', 'PCIe 2.0 ×1 (enable Gen 3 in raspi-config for more speed).'], ['CAM/DISP 0', 'Camera Module 3', 'Video in.'], ['FAN', 'Active Cooler', 'Recommended for AI work.']],
     steps: ['<code>sudo apt install hailo-all</code>, reboot, and check with <code>hailortcli fw-control identify</code>.', 'The post-process JSON files in <code>/usr/share/rpi-camera-assets</code> wire the model into rpicam-apps.', 'For your own logic, Picamera2 has Hailo examples that give you the keypoints in Python.', 'The AI Kit’s M.2 HAT+ sits on top of the Pi on standoffs; it’s drawn beside the board here so you can see the ribbon.'],
     specs: [['Accelerator', 'Hailo-8L, 13 TOPS'], ['Link', 'PCIe 2.0 ×1 (Gen 3 optional)'], ['Model', 'YOLOv8s-pose, 17 keypoints'], ['Speed', '≈ 30 fps at 640 × 640']],
@@ -617,6 +620,8 @@ rpicam-hello -t 0 \\
       });
       for (let f = 0; ; f++) {
         await ctx.sleep(1500);
+        const live = ctx.live();
+        if (live) { const n = live.poses.length; ctx.print(`webcam frame ${live.frames}: ${n} ${n === 1 ? 'person' : 'people'}${n ? `, ${live.poses[0].length} landmarks each` : ''} (MediaPipe pose, ${live.fps} fps)`); continue; }
         ctx.print(`frame ${f * 45}: 2 people, 17 keypoints each, ${fmt(29 + Math.random() * 2)} fps`);
       }
     },
@@ -628,8 +633,8 @@ rpicam-hello -t 0 \\
     lede: 'Run a YOLOv8 detector on the Hailo-8L from Python with Picamera2, keep only the “person” class, and count them. Useful for room occupancy — the frames never leave the Pi.',
     features: [['chip', 'Hailo inference from Python'], ['eye', 'Detections with confidence scores'], ['hand', 'Let people walk in and out in Inputs']],
     parts: [...CAMERA_PARTS, ...AI_PARTS],
-    wires: [['CAM0', 'cam.CSI'], ['PCIE', 'ai.PCIe'], ['FAN', 'cooler.FAN', { color: 0x2f3547, radius: 0.04 }]], noBreadboard: true, preview: true,
-    inputs: [{ id: 'people', type: 'range', label: 'People in the room', min: 0, max: 5, step: 1, value: 2 }],
+    wires: [['CAM0', 'cam.CSI'], ['PCIE', 'ai.PCIe'], ['FAN', 'cooler.FAN', { color: 0x2f3547, radius: 0.04 }]], noBreadboard: true, preview: true, ml: 'objects',
+    inputs: [{ id: 'people', type: 'range', scene: true, label: 'People in the room', min: 0, max: 5, step: 1, value: 2 }],
     pinout: [['PCIe', 'AI Kit', 'Hailo-8L accelerator.'], ['CAM/DISP 0', 'Camera Module 3', 'Video in.'], ['FAN', 'Active Cooler', 'Keeps the CPU cool under load.']],
     steps: ['The camera gives two streams: a full-size <code>main</code> one for viewing and a small <code>lores</code> one sized for the model.', '<code>hailo.run(frame)</code> returns the detections grouped by class; class 0 in COCO is “person”.', 'Each detection is <code>[y0, x0, y1, x1, score]</code> in 0–1 units.', 'Count on several frames in a row to smooth out flicker; log counts, not images, for privacy.'],
     specs: [['Model', 'YOLOv8s (COCO, 80 classes)'], ['Input', '640 × 640'], ['Accelerator', 'Hailo-8L, 13 TOPS'], ['Threshold', '0.5 confidence']],
@@ -677,7 +682,8 @@ with Hailo(MODEL) as hailo:
       for (;;) {
         ctx.at('frame = picam2.capture_array'); await ctx.sleep(120);
         ctx.at('people = count_people'); await ctx.sleep(120);
-        const n = ctx.input('people');
+        const live = ctx.live();
+        const n = live ? live.people : ctx.input('people');
         if (n !== last) { ctx.at('print("People'); ctx.print(`People in view: ${n}`); last = n; }
       }
     },

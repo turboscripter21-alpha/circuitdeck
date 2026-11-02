@@ -30,3 +30,4 @@ export function buyList(p) {
   if (!p.noBreadboard) out.push([1, 'Half-size breadboard (400 tie points)'], [1, 'Jumper wires, female-to-male and male-to-male (assorted pack)']);
   return out;
 }
+export { BB } from './projects-a.js';
