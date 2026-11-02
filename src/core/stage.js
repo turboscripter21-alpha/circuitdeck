@@ -147,6 +147,9 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar }) {
     ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
     const hits = ray.intersectObjects([content, wires], true);
+    // pin dots (sandbox) win over whatever mesh is in front of them
+    const dot = hits.find((h) => h.object.userData.pick?.pin);
+    if (dot) return { object: dot.object, point: dot.point, info: dot.object.userData.info, pick: dot.object.userData.pick };
     for (const h of hits) {
       let o = h.object;
       while (o && !o.userData.info && !o.userData.pick) o = o.parent;

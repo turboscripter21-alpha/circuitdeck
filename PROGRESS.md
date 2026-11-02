@@ -18,7 +18,12 @@
   progress in localStorage `circuitdeck:pi5:done`.
 - pi5/thumbs/*.png pre-rendered with /workspace/pw/thumbs.mjs (stage.snapshot).
 - All 29 projects pass /workspace/pw/pi-all.mjs (run, no page errors).
-## M3 — Sandbox (/sandbox/) — todo
+## M3 — Sandbox (/sandbox/) — done
+- src/sandbox/: circuit.js (nets + checks), roles.js, codegen.js (Python gpiozero / Arduino C++), sim.js, templates.js (12 starters), store.js (validate, localStorage, JSON export/import, #c= deflate share links), main.js (3D scene, click-to-wire pin dots, inspector move/rotate/value/remove, Circuit/Wiring/Checks/Parts list tabs, Components library, Templates + My saves, inputs panel, Run).
+- sandbox/index.html via `_tools/mkpage.py sandbox`; thumbs in sandbox/thumbs/ (pw/sb-thumbs.mjs).
+- Tested (pw/sb-test.mjs, sb-click.mjs): 12 templates 0 errors/0 warnings and run; share + export/import roundtrip identical; bad JSON rejected; board switch remaps; click wiring works; 0 console errors.
+- Also: stage.js gives pin dots pick priority; buildEsp32 gains physPoint(); pi5 wire labels used pin .name → fixed to .n.
+
 ## M4 — Gallery (/gallery/) — todo
 ## M5 — tests — todo
 ## M6 — deploy — todo

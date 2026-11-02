@@ -71,7 +71,7 @@ function pinLabel(name) {
 }
 function partPinLabel(e) {
   const def = PARTS[e.inst.type];
-  const pin = def.pins.find((p) => p.name === e.pin);
+  const pin = def.pins.find((p) => p.n === e.pin);
   return `${labelOf(e.id)} · ${pin?.label || e.pin}`;
 }
 const labelOf = (id) => project.parts.find((p) => p.id === id)?.label || id;
@@ -116,7 +116,7 @@ function buildScene(p) {
     if (!a?.point || !b?.point) continue; // a removed part leaves its wires out too
     const boardEnd = a.board ? a : b.board ? b : null;
     const ribbon = boardEnd && ['CAM0', 'CAM1', 'PCIE'].includes(boardEnd.name);
-    const gndish = [a, b].some((e) => !e.board && PARTS[e.inst.type].pins.find((x) => x.name === e.pin)?.role === 'gnd');
+    const gndish = [a, b].some((e) => !e.board && PARTS[e.inst.type].pins.find((x) => x.n === e.pin)?.role === 'gnd');
     let css = boardEnd ? PIN_COLORS[boardEnd.name] : gndish ? PIN_COLORS.GND : null;
     if (!css) css = PALETTE[pal++ % PALETTE.length];
     if (o.color != null) css = `#${o.color.toString(16).padStart(6, '0')}`;

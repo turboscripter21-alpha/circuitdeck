@@ -249,6 +249,7 @@ export function buildEsp32() {
   btn(1.4, -0.8, 'EN'); btn(1.4, 0.8, 'BOOT');
   const pitch = 0.254;
   const tips = {};
+  const byPhys = [null];
   const rows = [[ESP_LEFT, D / 2 - 0.15], [ESP_RIGHT, -D / 2 + 0.15]];
   const pinMat = metal(COLORS.gold);
   for (const [names, z] of rows) {
@@ -257,13 +258,16 @@ export function buildEsp32() {
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.35, 10), pinMat);
       p.position.set(x, T + 0.17, z); g.add(p);
       const key = n;
-      (tips[key] ||= []).push(new THREE.Vector3(x, T + 0.35, z));
+      const v = new THREE.Vector3(x, T + 0.35, z);
+      (tips[key] ||= []).push(v);
+      byPhys.push(v);
     });
   }
   const used = {};
   return {
     group: g, parts,
     pinPoint(name) { const l = tips[name]; if (!l) return null; used[name] = (used[name] ?? -1) + 1; return l[used[name] % l.length]; },
+    physPoint(phys) { return byPhys[phys] || null; },
     resetPins() { for (const k of Object.keys(used)) delete used[k]; },
     size: { w: W, d: D, h: 0.6 },
   };
