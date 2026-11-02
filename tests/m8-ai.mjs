@@ -175,7 +175,8 @@ await t('ml-camera', async () => {
   await p.goto(BASE + '/tinyml/#person-detection'); await ready(p);
   await p.click('.cd-ml-btn');
   await p.waitForFunction(() => (__pi5.live?.frames || 0) > 5, null, { timeout: 60000 });
-  await p.evaluate(() => { __pi5.start(); }); await p.waitForTimeout(2500);
+  await p.evaluate(() => { __pi5.start(); });
+  await p.waitForFunction(() => [...document.querySelectorAll('.console-lines > *')].some((d) => /from your webcam/.test(d.textContent)), null, { timeout: 30000 }).catch(() => {});
   const lines = await p.evaluate(() => [...document.querySelectorAll('.console-lines > *')].map((d) => d.textContent).slice(-3));
   const live = await p.evaluate(() => ({ ready: __pi5.live.ready, frames: __pi5.live.frames, mode: __pi5.live.mode }));
   await p.screenshot({ path: O + 'tinyml-webcam.png' });
@@ -196,7 +197,8 @@ await t('ml-qr', async () => {
   await p.click('.cd-ml-btn');
   await p.waitForFunction(() => !!__pi5.live?.qr, null, { timeout: 60000 });
   const qr = await p.evaluate(() => __pi5.live.qr);
-  await p.evaluate(() => { __pi5.start(); }); await p.waitForTimeout(3500);
+  await p.evaluate(() => { __pi5.start(); });
+  await p.waitForFunction(() => /circuitdeck\.vercel\.app/.test(document.querySelector('.console-lines')?.textContent || ''), null, { timeout: 30000 }).catch(() => {});
   const lines = await p.evaluate(() => [...document.querySelectorAll('.console-lines > *')].map((d) => d.textContent).join('\n'));
   await bq.close();
   return { pass: qr === 'https://circuitdeck.vercel.app' && /circuitdeck\.vercel\.app/.test(lines), qr };
