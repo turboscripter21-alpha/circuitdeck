@@ -1,0 +1,9 @@
+node_modules/
+.vercel/
+.env
+.env.*
+*.log
+.DS_Store
+_raw/
+_compare/
+_tools/

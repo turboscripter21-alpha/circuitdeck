@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page not found · Learn ESP32</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#f8f1e6" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #f8f1e6;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: #5b6168;
+        text-align: center;
+        padding: 0 16px;
+      }
+
+      /* the drafting grid of the stage floor, fading out */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, rgba(214, 198, 175, 0.3) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(214, 198, 175, 0.3) 1px, transparent 1px);
+        background-size: 28px 28px;
+        background-position: center;
+        -webkit-mask-image: radial-gradient(circle at center, #000 0, transparent 62%);
+        mask-image: radial-gradient(circle at center, #000 0, transparent 62%);
+      }
+
+      main {
+        position: relative;
+      }
+
+      svg {
+        width: 88px;
+        height: 70px;
+      }
+
+      .code {
+        margin: 18px 0 0;
+        font: 600 15px/18px ui-monospace, 'SFMono-Regular', Menlo, monospace;
+        letter-spacing: 0.08em;
+        color: #dc5812;
+      }
+
+      h1 {
+        margin: 6px 0 0;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #0f2239;
+      }
+
+      p {
+        margin: 10px 0 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      a {
+        display: inline-block;
+        margin-top: 22px;
+        padding: 9px 16px;
+        border-radius: 9px;
+        background: linear-gradient(180deg, #fb7d33, #f0611a);
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        text-transform: uppercase;
+        font-size: 14px;
+      }
+
+      a:hover {
+        background: linear-gradient(180deg, #fc8a45, #e85a14);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg viewBox="0 0 88 70" aria-hidden="true">
+        <g>
+          <path d="M32.5 48.9a16 16 0 0 1 23 0M22.4 39.2a30 30 0 0 1 43.2 0M12.4 29.4a44 44 0 0 1 63.2 0" fill="none" stroke="#f86b1d" stroke-width="8.5" stroke-linecap="round" />
+          <circle cx="44" cy="60" r="6" fill="#f86b1d" />
+        </g>
+      </svg>
+      <p class="code">digitalRead(page) == 404</p>
+      <h1>Nothing on this pin</h1>
+      <p>There's no page here. The lessons are all on the main board.</p>
+      <a href="/">Back to Learn ESP32</a>
+    </main>
+  </body>
+</html>
