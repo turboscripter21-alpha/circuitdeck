@@ -29,5 +29,13 @@
 - gallery/data.json built by _tools/gallery-data.mjs; ESP32 thumbs captured from the live ESP32 lesson strip (_tools/esp-thumbs.mjs) into gallery/thumbs/esp32/. ESP32 difficulty tags are CircuitDeck's own (gallery only; ESP32 track untouched).
 
 
-## M5 — tests — todo
+## M5 — tests — done
+- tests/smoke.mjs -> _compare/phase2/smoke.json: 13/13 checks, 0 console errors
+  - ESP32 board/blink/radar run + progress (3/20 persists after reload) + language en->es->en
+  - Pi 5 blink, rgb, ldr, dc-motor, people-counter: run, orbit, part click (inspector), remove + restore part
+  - sandbox: traffic-light run, weather-station share URL -> new page identical JSON
+  - gallery: 61 cards, Pi 5 = 29, Pi 5 + Advanced = 2; theme light/dark + reload persistence on all 4 pages; mobile 390x844 home no overflow, 1 credit
+- Also: full ESP32 regression 20/20 (tests/p2-suite.mjs), 29/29 Pi 5 projects, 12/12 sandbox templates + roundtrips + click-wiring
+- ESP32 bundle diff vs e495fc3: only the title suffix (Learn ESP32 -> CircuitDeck) and floorCredit off
+- Fix: Pi 5 ledes showed literal <code> tags
 ## M6 — deploy — todo

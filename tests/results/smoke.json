@@ -1,0 +1,198 @@
+{
+ "base": "http://127.0.0.1:8080",
+ "errors": [],
+ "esp32": {
+  "lessons": {
+   "board": {
+    "title": "Meet the ESP32 \u00b7 CircuitDeck",
+    "active": "Lesson 1: Meet the ESP32",
+    "serial": 111,
+    "progressBefore": "0/20",
+    "progressAfter": "1/20",
+    "pass": true
+   },
+   "blink": {
+    "title": "Flash two LEDs \u00b7 CircuitDeck",
+    "active": "Lesson 2: Flash two LEDs",
+    "serial": 89,
+    "progressBefore": "1/20",
+    "progressAfter": "2/20",
+    "pass": true
+   },
+   "radar": {
+    "title": "Ultrasonic radar \u00b7 CircuitDeck",
+    "active": "Lesson 19: Ultrasonic radar",
+    "serial": 89,
+    "progressBefore": "2/20",
+    "progressAfter": "3/20",
+    "pass": true
+   }
+  },
+  "progressStored": "[\"board\",\"blink\",\"radar\"]",
+  "progressAfterReload": "3/20",
+  "language": {
+   "from": "en",
+   "to": "es",
+   "picked": "es",
+   "available": 12,
+   "lessonsTitle": "Lecciones",
+   "back": "en"
+  },
+  "pass": true,
+  "ms": 107702
+ },
+ "errorCount": 0,
+ "pi5": {
+  "projects": {}
+ },
+ "pi5_blink": {
+  "id": "blink",
+  "consoleLines": 6,
+  "orbitChanged": true,
+  "inspectorOpen": true,
+  "parts": {
+   "before": 2,
+   "afterRemove": 1,
+   "afterRestore": 2
+  },
+  "pass": true,
+  "ms": 15253
+ },
+ "pi5_rgb": {
+  "id": "rgb",
+  "consoleLines": 5,
+  "orbitChanged": true,
+  "inspectorOpen": true,
+  "parts": {
+   "before": 4,
+   "afterRemove": 3,
+   "afterRestore": 4
+  },
+  "pass": true,
+  "ms": 14261
+ },
+ "pi5_ldr": {
+  "id": "ldr",
+  "consoleLines": 6,
+  "orbitChanged": true,
+  "inspectorOpen": true,
+  "parts": {
+   "before": 5,
+   "afterRemove": 4,
+   "afterRestore": 5
+  },
+  "pass": true,
+  "ms": 14395
+ },
+ "pi5_dc-motor": {
+  "id": "dc-motor",
+  "consoleLines": 3,
+  "orbitChanged": true,
+  "inspectorOpen": true,
+  "parts": {
+   "before": 3,
+   "afterRemove": 2,
+   "afterRestore": 3
+  },
+  "pass": true,
+  "ms": 13492
+ },
+ "pi5_people-counter": {
+  "id": "people-counter",
+  "consoleLines": 3,
+  "orbitChanged": true,
+  "inspectorOpen": true,
+  "parts": {
+   "before": 3,
+   "afterRemove": 2,
+   "afterRestore": 3
+  },
+  "pass": true,
+  "ms": 14496
+ },
+ "sandbox": {
+  "pass": true,
+  "runLines": 2,
+  "shareUrlChars": 299,
+  "roundtripIdentical": true,
+  "ms": 16028
+ },
+ "gallery": {
+  "pass": true,
+  "all": 61,
+  "pi5": 29,
+  "pi5Advanced": 2,
+  "url": "http://127.0.0.1:8080/gallery/?track=pi5&level=Advanced",
+  "ms": 2121
+ },
+ "theme": {},
+ "theme_home": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 19471
+ },
+ "theme_pi5": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 10769
+ },
+ "theme_sandbox": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 13307
+ },
+ "theme_gallery": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 5908
+ },
+ "mobile_home": {
+  "overflowX": 0,
+  "credit": 1,
+  "tracks": 4,
+  "pass": true,
+  "ms": 10027
+ },
+ "summary": {
+  "checks": 13,
+  "passed": 13,
+  "consoleErrors": 0,
+  "extra_full_esp32_regression": "20/20 lessons (results.json)",
+  "extra_pages_matrix": "16 page/theme/viewport combos: theme, title, 0 overflow, single credit (credit text check failed only on whitespace between two lines of the same link)",
+  "extra_pi5_all": "29/29 projects run (pi5-all.log)",
+  "extra_sandbox": "12/12 templates, export/import/share roundtrips, click-wiring (sandbox.log)",
+  "fix_during_M5": "Pi 5 lede showed literal <code> tags; now rendered as HTML (authored content)"
+ }
+}

@@ -345,7 +345,7 @@ function renderTab(name) {
   if (name === 'overview') {
     return `<h2>${esc(p.title)}</h2>
       <div class="cd-meta">${chip(`cd-diff cd-${p.difficulty.toLowerCase()}`, esc(p.difficulty))}${chip('', `${ICONS.clock}${esc(p.time)}`)}${p.topics.map((t) => chip('cd-topic', esc(t))).join('')}</div>
-      <p class="lede">${esc(p.lede)}</p>
+      <p class="lede">${p.lede}</p>
       <ul class="features">${p.features.map(([ic, html]) => `<li><span class="feature-icon">${ICONS[ic] || ICONS.chip}</span><span>${html}</span></li>`).join('')}</ul>
       <nav class="cd-pn" aria-label="Project navigation">
         ${prev ? `<a href="#${prev.id}" class="cd-pn-prev">${ICONS.prev}<span><small>Previous</small>${esc(prev.title)}</span></a>` : '<span></span>'}
