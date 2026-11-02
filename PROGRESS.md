@@ -109,3 +109,14 @@ Tests: tests/m9-regression.mjs (24 checks), m9-contrast.mjs, m9-targets.mjs, m9-
 - Suites: pi-all light 29/29, dark 29/29; sb-test ERRORS 0; smoke all true, ERRORS 0; sound-test errs []. (pw/p2-suite.mjs was the stale credit-checking copy; re-running tests/p2-suite.mjs.)
 - 03:20 IST: tests/p2-suite.mjs: ESP32 20/20 lessons, 16/16 page×theme×viewport, theme persist, switcher, ERRORS 0. tests/m9-regression.mjs: 24/24 pass, 0 console errors.
 - 03:35 IST: pushed 0120af6 (no force); deployed git archive of 0120af6 → dpl_2hz3iciLXc85RSSupG91c6zDgVBL, aliased circuitdeck.vercel.app. Live: m9-regression 24/24, 0 console errors; live shots _compare/m9/live-*.png (0 errors). M9 done (m15 partial: ESP32 strip titles are in the bundle).
+
+## M8 — AI/ML features (in progress, started 2026-11-02)
+Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 sandbox wiring-mistake checks + Explain with AI · 5 TinyML track · 8 Recommended next. (Train panel / Canvas mode: later, not in M8.) ESP32 bundle (assets/) untouched — everything rides on shared/chrome.js overlays.
+- [ ] api/ai.js (Vercel function, Gemini `gemini-flash-lite-latest`, key from `process.env.GEMINI_API_KEY`, size cap, per-IP rate limit, scoped system prompt, `{configured:false}` without key)
+- [ ] shared/ai.js tutor panel + Explain/Suggest fix + run-fail hints (ESP32, Pi 5, sandbox, TinyML)
+- [ ] Camera ML (vendored MediaPipe Tasks Vision + models, jsQR) in Pi 5 camera/qr/pose/people-counter + sandbox AI camera
+- [ ] Sandbox checks extended + Explain with AI
+- [ ] TinyML track (/tinyml/) + gallery
+- [ ] Recommended next (home + gallery)
+- [ ] Tests, commit, push, deploy
+- 03:25 IST Nov 3: resumed. `git stash pop` applied stash@{0} onto 241edf3 (only PROGRESS.md conflicted; chrome.js merged cleanly with the M9 m19 overlay). Stash entry kept until the first WIP commit lands.

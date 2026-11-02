@@ -1,5 +1,5 @@
-// CircuitDeck shared chrome: the track switcher (ESP32 · Pi 5 · Sandbox · Gallery)
-// and the light/dark theme toggle. Plain script, no dependencies, used by every page.
+// CircuitDeck shared chrome: the track switcher (ESP32 · Pi 5 · TinyML · Sandbox · Gallery),
+// the light/dark theme toggle, and the AI tutor button (it loads /shared/ai.js on every page). Plain script, no dependencies, used by every page.
 // The theme itself is applied before first paint by the tiny inline snippet in each
 // page's <head> (see THEME_BOOT in README); this file only wires the button.
 (() => {
@@ -8,6 +8,7 @@
   const TRACKS = [
     { id: 'esp32', href: '/', label: 'ESP32' },
     { id: 'pi5', href: '/pi5/', label: 'Pi 5' },
+    { id: 'tinyml', href: '/tinyml/', label: 'TinyML' },
     { id: 'sandbox', href: '/sandbox/', label: 'Sandbox' },
     { id: 'gallery', href: '/gallery/', label: 'Gallery' },
   ];
@@ -16,6 +17,7 @@
     if (p.startsWith('/pi5')) return 'pi5';
     if (p.startsWith('/sandbox')) return 'sandbox';
     if (p.startsWith('/gallery')) return 'gallery';
+    if (p.startsWith('/tinyml')) return 'tinyml';
     return 'esp32';
   };
   const getTheme = () => (root.dataset.theme === 'dark' ? 'dark' : 'light');
@@ -49,6 +51,9 @@
       <button type="button" class="cd-menu" aria-label="Tracks menu" aria-expanded="false" aria-controls="cd-tracks">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
+      ${here !== 'gallery' ? `<button type="button" class="cd-theme cd-ai-open-btn" data-cd-ai title="Ask the AI tutor" aria-label="Ask the AI tutor">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.7 4.6 4.6 1.7-4.6 1.7L12 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>
+      </button>` : ''}
       ${SOUND_PAGES.includes(here) ? `<button type="button" class="cd-theme cd-sound" data-cd-sound>
         <svg class="spk-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.4a8 8 0 0 1 0 11.2"/></svg>
         <svg class="spk-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
@@ -75,10 +80,12 @@
     snd = wrap.querySelector('[data-cd-sound]');
     if (snd) snd.addEventListener('click', () => setSound(!getSound()));
     syncSound();
+    const ai = wrap.querySelector('[data-cd-ai]');
+    if (ai) ai.addEventListener('click', () => window.CircuitDeckAI?.open());
   }
   // sound on/off (pages with simulated parts); the audio itself lives in src/core/sound.js
   const SKEY = 'circuitdeck:sound';
-  const SOUND_PAGES = ['pi5', 'sandbox'];
+  const SOUND_PAGES = ['pi5', 'sandbox', 'tinyml'];
   let snd;
   const getSound = () => { try { return localStorage.getItem(SKEY) !== '0'; } catch { return true; } };
   function setSound(on) {
@@ -121,6 +128,10 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();
+  // AI layer (tutor, editor help, run hints, recommendations): one shared script for every page
+  if (!document.querySelector('script[src="/shared/ai.js"]')) {
+    const sc = document.createElement('script'); sc.src = '/shared/ai.js'; sc.defer = true; document.head.appendChild(sc);
+  }
   // the theme may change in another tab
   window.addEventListener('storage', (e) => { if (e.key === KEY) setTheme(e.newValue === 'dark' ? 'dark' : 'light'); });
 })();

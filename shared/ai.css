@@ -1,0 +1,105 @@
+/* CircuitDeck AI layer (shared/ai.js): tutor drawer, editor AI button, run-failure toast,
+   "Recommended next" card. Lives outside the scaled artboard, so sizes are real pixels. */
+.cd-ai,.cd-ai-toast,.cd-rec,.cd-rec-g,.cd-ai-code{font-family:var(--cond,"Barlow Semi Condensed",system-ui,sans-serif)}
+.cd-ai svg,.cd-ai-toast svg,.cd-rec svg,.cd-rec-g svg,.cd-ai-code svg,.cd-ai-open-btn svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cd-ai-open-btn{color:var(--accent,#f86b1d)!important}
+.cd-ai-open-btn svg path{fill:color-mix(in srgb,currentColor 18%,transparent)}
+.cd-ai-badge{display:inline-grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:linear-gradient(180deg,#fb7d33,#f0611a);color:#fff}
+.cd-ai-badge svg{width:20px;height:20px}
+.cd-ai-x{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;border-radius:9px;border:0;background:transparent;color:var(--muted,#6b7380);cursor:pointer;padding:0}
+.cd-ai-x:hover{background:var(--accent-soft,#fdecdd);color:var(--navy,#0f2239)}
+.cd-ai-x svg{width:18px;height:18px}
+
+/* drawer */
+.cd-ai{position:fixed;z-index:1000;top:12px;right:12px;bottom:12px;width:min(410px,calc(100vw - 24px));display:flex;flex-direction:column;background:var(--card,#fffbf6);color:var(--ink,#2b3440);border:1.5px solid var(--line,#e5d8c5);border-radius:16px;box-shadow:0 24px 60px -20px #0f223966,0 2px 8px #0f22391a;overflow:hidden;animation:cd-ai-in .18s ease-out}
+.cd-ai[hidden]{display:none}
+@keyframes cd-ai-in{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.cd-ai-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 14px;border-bottom:1.5px solid var(--line,#e5d8c5)}
+.cd-ai-head>div{flex:1;min-width:0;display:grid}
+.cd-ai-head b{font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:var(--navy,#0f2239)}
+.cd-ai-ctx{font-family:system-ui,sans-serif;font-size:12px;color:var(--muted,#6b7380);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-ai-banner{margin:10px 12px 0;padding:9px 12px;border-radius:10px;background:var(--accent-soft,#fdecdd);color:var(--navy,#0f2239);font:13px/1.4 system-ui,sans-serif}
+.cd-ai-banner[hidden]{display:none}
+.cd-ai-log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;font:14.5px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.cd-ai-msg{max-width:92%;padding:9px 12px;border-radius:12px;word-wrap:break-word}
+.cd-ai-msg.is-model{align-self:flex-start;background:var(--bg,#f8f1e6);border:1px solid var(--line,#e5d8c5);border-top-left-radius:4px}
+.cd-ai-msg.is-user{align-self:flex-end;background:linear-gradient(180deg,#fb7d33,#f0611a);color:#fff;border-top-right-radius:4px}
+.cd-ai-msg.is-note{background:var(--accent-soft,#fdecdd);border-color:transparent}
+.cd-ai-msg p{margin:0 0 6px}.cd-ai-msg p:last-child{margin-bottom:0}
+.cd-ai-msg ul,.cd-ai-msg ol{margin:2px 0 6px;padding-left:20px}
+.cd-ai-msg li{margin:2px 0}
+.cd-ai-msg code{font:12.5px ui-monospace,"JetBrains Mono",Menlo,monospace;background:var(--code-bg,#fff);border:1px solid var(--line,#e5d8c5);border-radius:5px;padding:0 4px}
+.cd-ai-msg pre{margin:6px 0;padding:8px 10px;background:var(--code-bg,#fff);border:1px solid var(--line,#e5d8c5);border-radius:8px;overflow:auto;max-height:260px}
+.cd-ai-msg pre code{border:0;padding:0;background:none;white-space:pre}
+.cd-ai-dots{display:inline-flex;gap:4px;padding:4px 0}
+.cd-ai-dots i{width:7px;height:7px;border-radius:50%;background:var(--accent,#f86b1d);animation:cd-ai-dot 1s infinite ease-in-out}
+.cd-ai-dots i:nth-child(2){animation-delay:.15s}.cd-ai-dots i:nth-child(3){animation-delay:.3s}
+@keyframes cd-ai-dot{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:none}}
+.cd-ai-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.cd-ai-quick button,.cd-ai-toast button:not(.cd-ai-x){font:600 14px var(--cond,"Barlow Semi Condensed",sans-serif);letter-spacing:.03em;padding:6px 11px;border-radius:999px;border:1.5px solid var(--line,#e5d8c5);background:var(--card,#fffbf6);color:var(--navy,#0f2239);cursor:pointer}
+.cd-ai-quick button:hover{border-color:var(--accent,#f86b1d);color:var(--accent,#f86b1d)}
+.cd-ai-quick button[hidden]{display:none}
+.cd-ai.is-busy .cd-ai-quick button,.cd-ai.is-busy .cd-ai-send{opacity:.5;pointer-events:none}
+.cd-ai-form{display:flex;gap:8px;align-items:flex-end;padding:0 12px 8px}
+.cd-ai-form textarea{flex:1;resize:none;min-height:44px;max-height:140px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line,#e5d8c5);background:var(--code-bg,#fff);color:var(--navy,#0f2239);font:15px/1.4 system-ui,sans-serif}
+.cd-ai-form textarea:focus{outline:none;border-color:var(--accent,#f86b1d)}
+.cd-ai-send{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;border:0;background:linear-gradient(180deg,#fb7d33,#f0611a);color:#fff;cursor:pointer;flex:none}
+.cd-ai-send svg{width:20px;height:20px}
+.cd-ai-note{margin:0;padding:0 14px 12px;font:11.5px/1.4 system-ui,sans-serif;color:var(--muted,#6b7380)}
+.cd-ai button:focus-visible,.cd-ai-toast button:focus-visible,.cd-rec a:focus-visible,.cd-ai-code button:focus-visible{outline:2px solid var(--accent,#f86b1d);outline-offset:2px}
+@media (max-width:720px){
+  .cd-ai{top:auto;left:0;right:0;bottom:0;width:auto;height:min(78vh,620px);border-radius:18px 18px 0 0;border-bottom:0;animation-name:cd-ai-up}
+  .cd-ai-form textarea{font-size:16px}
+}
+@keyframes cd-ai-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+/* editor AI button + menu (inside the scaled code card) */
+.cd-ai-code{position:relative;display:inline-flex}
+.cd-ai-code .cd-ai-btn{color:var(--accent,#f86b1d)}
+.cd-ai-code .cd-ai-btn svg{width:20px;height:20px}
+.cd-ai-code .cd-ai-btn svg path{fill:color-mix(in srgb,currentColor 18%,transparent)}
+.cd-ai-menu{position:absolute;z-index:30;top:calc(100% + 6px);right:0;display:flex;flex-direction:column;min-width:190px;padding:5px;background:var(--card,#fffbf6);border:1.5px solid var(--line,#e5d8c5);border-radius:12px;box-shadow:var(--shadow,0 12px 28px -18px #0f223980)}
+.cd-ai-menu[hidden]{display:none}
+.cd-ai-menu button{text-align:left;padding:9px 12px;border:0;border-radius:8px;background:none;color:var(--navy,#0f2239);font:600 16px var(--cond,"Barlow Semi Condensed",sans-serif);letter-spacing:.02em;cursor:pointer;white-space:nowrap}
+.cd-ai-menu button:hover{background:var(--accent-soft,#fdecdd)}
+
+/* run-failure toast */
+.cd-ai-toast{position:fixed;z-index:999;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:10px 10px 10px 12px;background:var(--card,#fffbf6);border:1.5px solid var(--accent,#f86b1d);border-radius:14px;box-shadow:0 18px 40px -16px #0f223980;animation:cd-ai-up .2s ease-out}
+.cd-ai-toast[hidden]{display:none}
+.cd-ai-toast-t{display:grid;min-width:0;max-width:300px}
+.cd-ai-toast-t b{font-size:16px;color:var(--navy,#0f2239)}
+.cd-ai-toast-t small{font:12px system-ui,sans-serif;color:var(--muted,#6b7380);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-ai-toast button[data-t=hint]{background:linear-gradient(180deg,#fb7d33,#f0611a);border-color:transparent;color:#fff;white-space:nowrap}
+.cd-ai-toast button.is-soft{white-space:nowrap}
+@media (max-width:720px){.cd-ai-toast{flex-wrap:wrap;bottom:10px}.cd-ai-toast-t{flex:1 1 calc(100% - 90px)}.cd-ai-toast .cd-ai-badge{display:none}}
+
+/* recommended next: lesson pages (inside the scaled artboard, next to the lessons heading) */
+.cd-rec{position:absolute;top:-6px;right:0;display:flex;align-items:center;gap:2px;max-width:min(560px,70%);background:var(--card,#fffbf6);border:1.5px solid var(--line,#e5d8c5);border-radius:12px;box-shadow:var(--shadow);padding:2px 2px 2px 0}
+.cd-rec a{display:flex;align-items:baseline;gap:8px;min-width:0;padding:5px 6px 5px 12px;color:var(--navy,#0f2239);text-decoration:none;white-space:nowrap}
+.cd-rec em{display:inline-flex;align-items:center;gap:4px;font-style:normal;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#f86b1d)}
+.cd-rec em svg{width:15px;height:15px;align-self:center}
+.cd-rec b{font-size:17px;font-weight:700}
+.cd-rec small{font:13px system-ui,sans-serif;color:var(--muted,#6b7380);overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cd-rec a:hover b{color:var(--accent,#f86b1d)}
+.cd-rec .cd-ai-x{width:26px;height:26px}
+html.compact .cd-rec{position:static;margin:0 0 8px;max-width:none}
+html.compact .cd-rec a{flex-wrap:wrap;row-gap:0;white-space:normal}
+html.compact .cd-rec b{font-size:15px}
+html.compact .cd-rec small{flex-basis:100%}
+
+/* recommended next: gallery hero */
+.cd-rec-g{margin-top:16px;display:grid;gap:8px}
+.cd-rec-main{display:flex;align-items:center;gap:14px;padding:10px 16px 10px 10px;border-radius:14px;border:1.5px solid var(--accent,#f86b1d);background:var(--card,#fffbf6);color:var(--navy,#0f2239);text-decoration:none;box-shadow:var(--shadow);max-width:640px}
+.cd-rec-main img{width:96px;height:60px;object-fit:cover;border-radius:9px;flex:none;background:var(--bg,#f8f1e6)}
+.cd-rec-main>span{display:grid;flex:1;min-width:0}
+.cd-rec-main em{display:inline-flex;align-items:center;gap:5px;font-style:normal;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#f86b1d)}
+.cd-rec-main em svg{width:15px;height:15px}
+.cd-rec-main b{font-size:20px}
+.cd-rec-main small{font:13px system-ui,sans-serif;color:var(--muted,#6b7380)}
+.cd-rec-main>svg{width:22px;height:22px;flex:none;color:var(--accent,#f86b1d)}
+.cd-rec-main:hover{transform:translateY(-1px)}
+.cd-rec-alts{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;font:13px system-ui,sans-serif;color:var(--muted,#6b7380)}
+.cd-rec-alts a{color:var(--navy,#0f2239);font-weight:600;text-decoration:none;border-bottom:1.5px solid var(--accent-soft,#fdecdd)}
+.cd-rec-alts a small{color:var(--muted,#6b7380);font-weight:400}
+.cd-rec-alts a:hover{border-color:var(--accent,#f86b1d)}
+@media (prefers-reduced-motion:reduce){.cd-ai,.cd-ai-toast{animation:none}.cd-ai-dots i{animation:none;opacity:.7}}
