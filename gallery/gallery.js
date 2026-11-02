@@ -1,7 +1,7 @@
 // CircuitDeck gallery: renders /gallery/data.json (built by _tools/gallery-data.mjs) with track,
 // difficulty and text filters. The filters live in the query string so a filtered view can be shared.
 (() => {
-  const TRACK = { esp32: 'ESP32', pi5: 'Pi 5', sandbox: 'Sandbox' };
+  const TRACK = { esp32: 'ESP32', pi5: 'Pi 5', tinyml: 'TinyML', sandbox: 'Sandbox' };
   const grid = document.getElementById('g-grid');
   const empty = document.getElementById('g-empty');
   const count = document.getElementById('g-count');
@@ -11,7 +11,7 @@
   const pick = (v, list) => list.find((x) => x.toLowerCase() === String(v || '').trim().toLowerCase()) || 'all';
   const state = { track: pick(params.get('track'), Object.keys(TRACK)), level: pick(params.get('level'), ['Beginner', 'Intermediate', 'Advanced']), q: (params.get('q') || '').slice(0, 80) };
   const readDone = (k) => { try { const v = JSON.parse(localStorage.getItem(k) || '[]'); return new Set(Array.isArray(v) ? v : Object.keys(v || {})); } catch { return new Set(); } };
-  const done = { esp32: readDone('learn-esp32:done'), pi5: readDone('circuitdeck:pi5:done'), sandbox: new Set() };
+  const done = { esp32: readDone('learn-esp32:done'), pi5: readDone('circuitdeck:pi5:done'), tinyml: readDone('circuitdeck:tinyml:done'), sandbox: new Set() };
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   let items = [];
   let cards = [];
@@ -23,7 +23,7 @@
     a.dataset.track = it.track;
     a.dataset.level = it.difficulty;
     a.dataset.text = [it.title, it.short, ...(it.topics || []), TRACK[it.track], it.difficulty].join(' ').toLowerCase();
-    const kind = it.track === 'esp32' ? 'Lesson' : it.track === 'pi5' ? 'Project' : 'Template';
+    const kind = it.track === 'esp32' ? 'Lesson' : it.track === 'pi5' || it.track === 'tinyml' ? 'Project' : 'Template';
     const foot = it.track === 'sandbox' ? `Opens in the sandbox · ${it.board === 'pi5' ? 'Pi 5' : 'ESP32'}` : [kind + ' ' + it.n, it.time].filter(Boolean).join(' · ');
     a.innerHTML = `
       <div class="card-thumb"><img src="${esc(it.thumb)}" alt="" loading="lazy" decoding="async" width="320" height="200" /></div>

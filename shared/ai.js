@@ -310,6 +310,7 @@
         if (r?.f) { const fresh = now - (r.lf || 0) < 14 * 864e5; s += fresh ? 45 : 25; why.push([r.f > 1 ? `${r.f} runs hit a problem — have another go` : 'Your last run hit a problem — have another go', 45]); }
         else if (seen[key]) { s += 14; why.push(['You opened it but haven’t finished', 14]); }
         if (track === active) s += 20;
+        if (track === page && i === last + 1) s += 25; // on a track's own page, its next project first
         if (!totalDone && track === 'esp32' && i === 0) { s += 30; why.unshift(['Start here: the basics of the ESP32 board', 80]); }
         if (!totalDone && track === 'pi5' && i === 0) s += 15;
         if (totalDone < 4 && it.difficulty === 'Beginner') s += 10;

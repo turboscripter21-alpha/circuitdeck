@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <script>try{if(localStorage.getItem('circuitdeck:theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
     <title>Gallery · CircuitDeck</title>
-    <meta name="description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects and 12 sandbox starter circuits, filterable by track and difficulty." />
+    <meta name="description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects, 6 TinyML projects and 12 sandbox starter circuits, filterable by track and difficulty." />
     <meta name="theme-color" content="#f8f1e6" />
     <meta name="application-name" content="CircuitDeck" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -17,7 +17,7 @@
     <meta property="og:site_name" content="CircuitDeck" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:title" content="Gallery · CircuitDeck" />
-    <meta property="og:description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects and 12 sandbox starter circuits, filterable by track and difficulty." />
+    <meta property="og:description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects, 6 TinyML projects and 12 sandbox starter circuits, filterable by track and difficulty." />
     <meta property="og:url" content="https://circuitdeck.vercel.app/gallery/" />
     <meta property="og:image" content="https://circuitdeck.vercel.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -25,7 +25,7 @@
     <meta property="og:image:alt" content="CircuitDeck: 3D ESP32 and Raspberry Pi 5 project tracks and a circuit sandbox" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Gallery · CircuitDeck" />
-    <meta name="twitter:description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects and 12 sandbox starter circuits, filterable by track and difficulty." />
+    <meta name="twitter:description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects, 6 TinyML projects and 12 sandbox starter circuits, filterable by track and difficulty." />
     <meta name="twitter:image" content="https://circuitdeck.vercel.app/og-image.png" />
     <meta name="twitter:image:alt" content="CircuitDeck: 3D ESP32 and Raspberry Pi 5 project tracks and a circuit sandbox" />
     <link rel="preload" href="/assets/barlow-semi-condensed-latin-600-normal-BkLiAYu4.woff2" as="font" type="font/woff2" crossorigin />
@@ -51,6 +51,7 @@
         <div class="g-tracks">
           <a class="g-track" href="/"><b>ESP32</b><span><em id="n-esp32">20</em> lessons · Arduino C++ · Wi-Fi &amp; Bluetooth</span></a>
           <a class="g-track" href="/pi5/"><b>Raspberry Pi 5</b><span><em id="n-pi5">29</em> projects · Python · camera &amp; AI Kit</span></a>
+          <a class="g-track" href="/tinyml/"><b>TinyML</b><span><em id="n-tinyml">6</em> projects · ESP32-S3 · on-device ML</span></a>
           <a class="g-track" href="/sandbox/"><b>Sandbox</b><span><em id="n-sandbox">12</em> starter circuits · build your own</span></a>
         </div>
       </section>
@@ -60,6 +61,7 @@
           <button class="chip" data-v="all" aria-pressed="true">All</button>
           <button class="chip" data-v="esp32" aria-pressed="false">ESP32</button>
           <button class="chip" data-v="pi5" aria-pressed="false">Pi 5</button>
+          <button class="chip" data-v="tinyml" aria-pressed="false">TinyML</button>
           <button class="chip" data-v="sandbox" aria-pressed="false">Sandbox</button>
         </div>
         <div class="g-group" role="group" aria-label="Difficulty" data-filter="level">

@@ -23,7 +23,7 @@ a{color:inherit}
 main{flex:1;padding:6px clamp(16px,3vw,36px) 28px;max-width:1440px;width:100%;margin:0 auto}
 .g-hero h2{margin:8px 0 4px;font:700 34px/1.1 var(--cond);letter-spacing:.03em;text-transform:uppercase;color:var(--navy)}
 .g-hero p{margin:0;max-width:760px;font-size:17px;line-height:1.5}
-.g-tracks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0 6px}
+.g-tracks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:20px 0 6px}
 .g-track{display:block;text-decoration:none;padding:16px 18px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);transition:border-color .15s,transform .15s}
 .g-track:hover{border-color:var(--accent);transform:translateY(-2px)}
 .g-track b{display:block;font:700 20px/1.1 var(--cond);letter-spacing:.05em;text-transform:uppercase;color:var(--navy)}
@@ -48,7 +48,7 @@ main{flex:1;padding:6px clamp(16px,3vw,36px) 28px;max-width:1440px;width:100%;ma
 .card-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .tag{font:600 12px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;padding:5px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent-deep)}
-.tag.t-esp32{background:#e4eefb;color:#2c5f9e}.tag.t-pi5{background:#fbe3e8;color:#b0294a}.tag.t-sandbox{background:#e2f4ee;color:#1f7d66}
+.tag.t-esp32{background:#e4eefb;color:#2c5f9e}.tag.t-pi5{background:#fbe3e8;color:#b0294a}.tag.t-sandbox{background:#e2f4ee;color:#1f7d66}.tag.t-tinyml{background:#efe6fb;color:#6a3fa8}html[data-theme=dark] .tag.t-tinyml{background:#2c2240;color:#c6a8f5}
 html[data-theme=dark] .tag.t-esp32{background:#1d2c40;color:#8fb8f2}html[data-theme=dark] .tag.t-pi5{background:#3a1d26;color:#f190a6}html[data-theme=dark] .tag.t-sandbox{background:#173229;color:#6fd3b7}
 .lvl{font:600 12px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;padding:5px 7px;border-radius:6px;border:1.5px solid currentColor}
 .lvl-Beginner{color:#27a689}.lvl-Intermediate{color:#d08a14}.lvl-Advanced{color:#d4452c}
