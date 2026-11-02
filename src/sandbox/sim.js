@@ -57,8 +57,9 @@ export function runSim({ c, conn, insts, inputs, print, beep, mark, codeLines })
     }
     // camera / AI
     if (R.cams.length && R.ais.length && t % T.printEvery === 0) {
-      const s = inputs.scene || 'person';
-      st.labels = s === 'nothing' ? [] : [s];
+      const live = inputs.__live;
+      if (live?.ready) st.labels = [...new Set(live.labels.map((l) => l.name))];
+      else { const s = inputs.scene || 'person'; st.labels = s === 'nothing' ? [] : [s]; }
       if (st.labels.length) print(`Detected: ${st.labels.join(', ')}`);
       for (const a of R.ais) set(a, { busy: true });
     } else if (R.cams.length && !R.ais.length && t % 50 === 0) { print(`Saved capture-${t / 50}.jpg`); insts.__shutter?.(); }

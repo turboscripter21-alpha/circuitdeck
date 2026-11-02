@@ -112,11 +112,12 @@ Tests: tests/m9-regression.mjs (24 checks), m9-contrast.mjs, m9-targets.mjs, m9-
 
 ## M8 — AI/ML features (in progress, started 2026-11-02)
 Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 sandbox wiring-mistake checks + Explain with AI · 5 TinyML track · 8 Recommended next. (Train panel / Canvas mode: later, not in M8.) ESP32 bundle (assets/) untouched — everything rides on shared/chrome.js overlays.
-- [ ] api/ai.js (Vercel function, Gemini `gemini-flash-lite-latest`, key from `process.env.GEMINI_API_KEY`, size cap, per-IP rate limit, scoped system prompt, `{configured:false}` without key)
-- [ ] shared/ai.js tutor panel + Explain/Suggest fix + run-fail hints (ESP32, Pi 5, sandbox, TinyML)
-- [ ] Camera ML (vendored MediaPipe Tasks Vision + models, jsQR) in Pi 5 camera/qr/pose/people-counter + sandbox AI camera
-- [ ] Sandbox checks extended + Explain with AI
+- [x] api/ai.js (Vercel function, Gemini `gemini-flash-lite-latest`, key from `process.env.GEMINI_API_KEY`, size cap, per-IP rate limit, scoped system prompt, `{configured:false}` without key)
+- [x] shared/ai.js tutor panel + Explain/Suggest fix + run-fail hints (ESP32, Pi 5, sandbox, TinyML)
+- [~] Camera ML (shared/ml-camera.js done + sandbox AI camera webcam toggle; Pi 5 projects next) (vendored MediaPipe Tasks Vision + models, jsQR) in Pi 5 camera/qr/pose/people-counter + sandbox AI camera
+- [x] Sandbox checks extended + Explain with AI (LED current too low/high with per-colour Vf, button to 5 V on a Pi GPIO, swapped SDA/SCL, Pi GPIO total-current budget; Checks tab "Explain with AI" opens the tutor in wiring mode)
 - [ ] TinyML track (/tinyml/) + gallery
-- [ ] Recommended next (home + gallery)
+- [x] Recommended next (home + gallery) — in shared/ai.js; verify in tests
 - [ ] Tests, commit, push, deploy
 - 03:25 IST Nov 3: resumed. `git stash pop` applied stash@{0} onto 241edf3 (only PROGRESS.md conflicted; chrome.js merged cleanly with the M9 m19 overlay). Stash entry kept until the first WIP commit lands.
+- 03:40 IST Nov 3: resumed from stash@{0} (conflict only in PROGRESS.md, kept both). sb-test 12/12 templates clean, 0 console errors; sandbox Explain + webcam probe OK.

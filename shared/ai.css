@@ -103,3 +103,13 @@ html.compact .cd-rec small{flex-basis:100%}
 .cd-rec-alts a small{color:var(--muted,#6b7380);font-weight:400}
 .cd-rec-alts a:hover{border-color:var(--accent,#f86b1d)}
 @media (prefers-reduced-motion:reduce){.cd-ai,.cd-ai-toast{animation:none}.cd-ai-dots i{animation:none;opacity:.7}}
+
+/* M8 · sandbox "Explain with AI" + in-browser ML webcam controls */
+.cd-ai-explain{display:inline-flex;align-items:center;gap:6px;margin:10px 0 4px}
+.cd-ai-explain svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.cd-ai-explain svg path{fill:color-mix(in srgb,currentColor 18%,transparent)}
+.cd-ml-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.cd-ml-btn{display:inline-flex;align-items:center;gap:6px;min-height:36px}
+.cd-ml-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+.cd-ml-btn.is-busy{opacity:.75;cursor:progress}
+.cd-ml-note{margin:2px 0 6px;font-size:12.5px;line-height:1.35;color:var(--muted,#5b6574)}

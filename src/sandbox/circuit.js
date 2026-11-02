@@ -15,6 +15,7 @@ export const BUS = {
   esp32: { sda: ['GPIO21'], scl: ['GPIO22'], mosi: ['GPIO23'], miso: ['GPIO19'], sck: ['GPIO18'], cs: ['GPIO5', 'GPIO15'] },
 };
 const PORT_FOR = { csi: ['CAM0', 'CAM1'], pcie: ['PCIE'], fan: ['FAN'] };
+const LED_VF = { red: 2.0, yellow: 2.1, orange: 2.1, green: 2.2, blue: 3.0, white: 3.0 };
 const OHMS = { 220: 220, 330: 330, '1k': 1000, '2k': 2000, '10k': 10000 };
 export const ohms = (p) => OHMS[p.opts?.ohms || '330'] || 330;
 
@@ -102,6 +103,7 @@ export function analyse(c) {
   const info = new Map(list.map((n) => [n, describe(c, n)]));
   const issues = [];
   const add = (sev, msg, parts = [], refs = []) => issues.push({ sev, msg, parts, refs });
+  const ledLoad = [];
   const net = (ref) => netOf.get(ref) || null;
   const I = (ref) => { const n = net(ref); return n ? info.get(n) : null; };
   const label = (ref) => refLabel(c, ref);
@@ -247,6 +249,17 @@ export function analyse(c) {
       if (part.type === 'led' || part.type === 'rgbled') {
         if (p.role === 'in' && (gpioHere.length || d.power.length)) add('error', `${name} has no current-limiting resistor on ${p.n} — it will draw too much current and can burn out ${gpioHere[0] || 'the LED'}. Put a 220–330 Ω resistor in series.`, [part.id], [ref]);
         if (p.role === 'in' && d.realGnd) add('warn', `${name} looks backwards: its anode is on ground. The long leg (anode) goes towards the GPIO.`, [part.id], [ref]);
+        // M8: current through the series resistor — too dim, or too much for the pin
+        if (p.role === 'in' && !gpioHere.length && !d.power.length) for (const f of far) {
+          const fd = info.get(f.net);
+          const src = fd.gpio.length ? 3.3 : fd.power.length ? Math.max(...fd.power.map((x) => x.volts)) : null;
+          if (src == null) continue;
+          const vf = LED_VF[part.opts?.color] ?? 2.0, R = ohms(f.r), mA = Math.max(0, (src - vf) / R * 1000);
+          const rTxt = `${f.r.opts?.ohms || '330'} Ω`;
+          if (fd.gpio.length) ledLoad.push({ part, mA, g: fd.gpio[0] });
+          if (mA < 0.5) add('warn', `${name} will be very dim: (${src} V − ${vf} V) ÷ ${rTxt} ≈ ${mA.toFixed(2)} mA. Use 220–330 Ω${vf >= 2.8 && src < 4 ? ' — a blue or white LED needs about 3 V, so 3.3 V leaves little headroom' : ''}.`, [part.id, f.r.id], [ref]);
+          else if (mA > 16) add(fd.gpio.length ? 'error' : 'warn', `${name}: ${rTxt} lets about ${mA.toFixed(0)} mA through${fd.gpio.length ? ` — more than ${fd.gpio[0]} should supply (aim for 2–10 mA)` : ''}. Use a bigger resistor.`, [part.id, f.r.id], [ref]);
+        }
       }
       // buttons: GPIO on one side, GND (or 3V3) on the other
       if (p.role === 'switch') {
@@ -254,6 +267,7 @@ export function analyse(c) {
         const od = I(`${part.id}.${other.n}`);
         if (p === def.pins[0] && od) {
           if ((d.power.length && od.realGnd) || (d.realGnd && od.power.length)) add('error', `Pressing ${name} would short ${d.power[0]?.name || od.power[0]?.name} to GND.`, [part.id], [ref]);
+          else if ((d.gpio.length && od.power.some((x) => x.volts > 3.6)) || (od.gpio.length && d.power.some((x) => x.volts > 3.6))) add('error', `Pressing ${name} puts 5 V on ${d.gpio[0] || od.gpio[0]} — the ${B.short}’s GPIO is 3.3 V only. Wire the other side to GND instead.`, [part.id], [ref]);
           else if ((d.gpio.length && !od.realGnd && !od.power.length && !od.gpio.length) || (od.gpio.length && !d.realGnd && !d.power.length && !d.gpio.length)) add('warn', `${name}: wire the other side to GND (the code uses the internal pull-up).`, [part.id], [ref]);
         }
       }
@@ -292,6 +306,20 @@ export function analyse(c) {
   // I2C address clashes
   const i2cTypes = bus.sda.map((p) => p.type);
   for (const t of new Set(i2cTypes)) if (i2cTypes.filter((x) => x === t).length > 1) add('warn', `Two ${PARTS[t].name} on one I2C bus share the same address — change one board’s address jumper.`, bus.sda.filter((p) => p.type === t).map((p) => p.id));
+  // M8: I2C lines swapped (SDA on the board's SCL pin and the other way round)
+  if (BUS[board]) for (const part of c.parts) {
+    const pins = PARTS[part.type]?.pins || [];
+    const sda = pins.find((x) => x.role === 'sda'), scl = pins.find((x) => x.role === 'scl');
+    if (!sda || !scl) continue;
+    const gs = I(`${part.id}.${sda.n}`)?.gpio || [], gc = I(`${part.id}.${scl.n}`)?.gpio || [];
+    if (!(gs.some((g) => BUS[board].scl.includes(g)) && gc.some((g) => BUS[board].sda.includes(g)))) continue;
+    // the swap error replaces the two per-pin "not the hardware bus" warnings for this part
+    for (let k = issues.length - 1; k >= 0; k--) if (issues[k].sev === 'warn' && issues[k].parts.length === 1 && issues[k].parts[0] === part.id && /hardware (SDA|SCL) pin/.test(issues[k].msg)) issues.splice(k, 1);
+    add('error', `${partName(c, part)}: SDA and SCL are swapped — SDA goes to ${BUS[board].sda[0]} and SCL to ${BUS[board].scl[0]}.`, [part.id]);
+  }
+  // M8: total LED current from the GPIO pins
+  const totalmA = ledLoad.reduce((a, x) => a + x.mA, 0);
+  if (board === 'pi5' && totalmA > 50) add('warn', `${ledLoad.length} LEDs draw about ${totalmA.toFixed(0)} mA from the GPIO pins together — the Pi 5’s GPIO bank is only good for about 50 mA in total. Use bigger resistors or a transistor driver.`, ledLoad.map((x) => x.part.id));
   // servo budget
   const servos = c.parts.filter((p) => p.type === 'servo' && I(`${p.id}.V+`)?.power.length);
   if (servos.length > 2) add('warn', `${servos.length} servos on the board’s 5 V pin can brown it out when they move together. Give them their own 5–6 V supply.`, servos.map((p) => p.id));

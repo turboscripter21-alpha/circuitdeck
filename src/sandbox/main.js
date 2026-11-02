@@ -458,7 +458,7 @@ function renderTab(name) {
   if (name === 'example') {
     const items = result.issues.map((i) => `<li class="sb-issue ${SEV[i.sev][1]}"><b>${SEV[i.sev][0]}</b><span>${esc(i.msg)}</span></li>`).join('');
     return `<h2>Checks</h2><p class="sub">Voltage, polarity, current, pin conflicts and bus pins, re-checked on every change.</p>
-      ${items ? `<ul class="sb-issues">${items}</ul>` : `<p class="sb-status is-ok">${ICONS.check}All checks pass.</p>`}
+      ${items ? `<ul class="sb-issues">${items}</ul><button type="button" class="cd-btn cd-ai-explain" data-act="ai-explain"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span>Explain with AI</span></button>` : `<p class="sb-status is-ok">${ICONS.check}All checks pass.</p>`}
       <p class="cd-note">The checks catch common mistakes but are not a full electrical simulation — double-check datasheets before powering real hardware.</p>`;
   }
   // parts list (BOM)
@@ -488,6 +488,7 @@ infoContent.addEventListener('click', async (e) => {
   if (b.dataset.delwire != null) return removeWire(+b.dataset.delwire);
   const act = b.dataset.act;
   if (act === 'checks') info.show('example');
+  else if (act === 'ai-explain') window.CircuitDeckAI?.open({ mode: 'wiring', issues: result.issues.map((i) => `${SEV[i.sev][0]}: ${i.msg}`).join('\n') });
   else if (act === 'undo-board') undoBoardSwitch();
   else if (act === 'add') openFly('parts', $('[data-nav=parts]'));
   else if (act === 'save') {
@@ -536,7 +537,8 @@ function renderPanel() {
   spec = inputSpec(circ, result.conn);
   inputs = { ...defaultInputs(spec), ...Object.fromEntries(Object.entries(inputs).filter(([k]) => spec.some((s) => s.id === k))) };
   inputs.__keys = [];
-  if (!spec.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+  if (liveCam) inputs.__live = liveCam.latest;
+  if (!spec.length) { stopWebcam(); panel.hidden = true; panel.innerHTML = ''; return; }
   panel.hidden = false;
   const rows = spec.map((s) => {
     if (s.kind === 'range') return `<label class="cd-in"><span>${esc(s.label)}</span><input type="range" data-input="${esc(s.id)}" min="${s.min}" max="${s.max}" step="${s.step}" value="${inputs[s.id]}"><output>${esc(`${inputs[s.id]} ${s.unit}`)}</output></label>`;
@@ -544,8 +546,42 @@ function renderPanel() {
     if (s.kind === 'keys') return `<div class="sb-keys" role="group" aria-label="Keypad">${['1', '2', '3', 'A', '4', '5', '6', 'B', '7', '8', '9', 'C', '*', '0', '#', 'D'].map((k) => `<button type="button" class="cd-btn" data-key="${k}">${k}</button>`).join('')}</div>`;
     return `<button type="button" class="cd-btn cd-press" data-input="${esc(s.id)}">${ICONS.hand}<span>${esc(s.label)}</span></button>`;
   }).join('');
-  panel.innerHTML = `<header><h3>Inputs</h3><small>Simulated</small></header>${rows}`;
+  const camScene = spec.some((s) => s.id === 'scene');
+  panel.innerHTML = `<header><h3>Inputs</h3><small>${liveCam ? 'Your webcam' : 'Simulated'}</small></header>${camScene ? '<canvas class="cd-preview sb-live" width="320" height="180" aria-label="Webcam preview with detections" hidden style="display:none"></canvas><div class="cd-ml-row"></div><p class="cd-ml-note" hidden></p>' : ''}${rows}`;
+  if (camScene) mountWebcam(); else stopWebcam();
 }
+// ---- M8: the visitor's webcam as the AI camera, run by MediaPipe in the browser
+let liveCam = null, mlBtn = null, liveRaf = 0;
+async function mountWebcam() {
+  const row = panel.querySelector('.cd-ml-row');
+  const note = panel.querySelector('.cd-ml-note');
+  if (!window.CircuitDeckML) await import('/shared/ml-camera.js');
+  if (!row.isConnected) return;
+  if (!mlBtn) mlBtn = window.CircuitDeckML.toggleButton({
+    mode: 'objects', label: 'Use my webcam (runs in your browser)',
+    onStart(cam) { liveCam = cam; inputs.__live = cam.latest; syncLive(); },
+    onStop() { liveCam = null; delete inputs.__live; syncLive(); },
+    onError(msg) { const n = panel.querySelector('.cd-ml-note'); if (n) { n.hidden = false; n.textContent = msg; } },
+  });
+  row.appendChild(mlBtn);
+  if (note) { note.hidden = false; note.textContent = 'Object detection runs on this device with MediaPipe — no video leaves your browser.'; }
+  syncLive();
+}
+function syncLive() {
+  const cv = panel.querySelector('.sb-live');
+  const sel = panel.querySelector('[data-input="scene"]');
+  const small = panel.querySelector('header small');
+  if (small) small.textContent = liveCam ? 'Your webcam' : 'Simulated';
+  if (sel) sel.closest('label').style.display = liveCam ? 'none' : '';
+  if (!cv) return;
+  cv.hidden = !liveCam; cv.style.display = liveCam ? '' : 'none';
+  cancelAnimationFrame(liveRaf);
+  if (!liveCam) return;
+  const c = cv.getContext('2d');
+  const loop = () => { if (!liveCam || !cv.isConnected) return; liveCam.draw(c, cv.width, cv.height); liveRaf = requestAnimationFrame(loop); };
+  loop();
+}
+function stopWebcam() { if (mlBtn) { mlBtn.stopCam(); mlBtn = null; } liveCam = null; delete inputs.__live; cancelAnimationFrame(liveRaf); }
 function setInput(id, v) {
   inputs[id] = v;
   if (insts[id]?.pressable) insts[id].set({ pressed: !!v });
@@ -744,6 +780,13 @@ requestAnimationFrame(() => requestAnimationFrame(() => {
   setTimeout(() => $('#loader')?.remove(), 700);
 }));
 // for tests and the thumbnail script
+// M8: what the AI tutor sees on this page
+window.__cdAIContext = () => ({
+  track: 'sandbox', id: circ?.name || 'circuit', title: `Sandbox · ${circ?.name || 'My circuit'} (${BOARDS[circ?.board]?.name || ''})`,
+  lesson: circ ? `Parts: ${circ.parts.map((p) => `${p.id} (${PARTS[p.type]?.name || p.type}${p.opts?.ohms ? `, ${p.opts.ohms} Ω` : ''}${p.opts?.color ? `, ${p.opts.color}` : ''})`).join('; ')}\nWires: ${circ.wires.map(([a, b]) => `${refLabel(circ, a)} → ${refLabel(circ, b)}`).join('; ')}` : '',
+  code: genOut.code, lang: genOut.lang,
+  issues: result.issues.map((i) => `${SEV[i.sev][0]}: ${i.msg}`).join('\n'),
+});
 window.__sb = {
   stage, TEMPLATES, loadTemplate, load, addPart, addWire, removePart, removeWire, setBoard, inspectPart, start, stop: () => stop(true), share, importJSON,
   exportJSON: () => store.serialize(circ), decode: store.decodeShare, setInput,
