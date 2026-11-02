@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>try{if(localStorage.getItem('circuitdeck:theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+    <title>Gallery · CircuitDeck</title>
+    <meta name="description" content="Every CircuitDeck project in one place: 20 ESP32 lessons, 29 Raspberry Pi 5 projects and 12 sandbox starter circuits, filterable by track and difficulty." />
+    <meta name="theme-color" content="#f8f1e6" />
+    <meta name="application-name" content="CircuitDeck" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" href="https://circuitdeck.vercel.app/gallery/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CircuitDeck" />
+    <meta property="og:title" content="Gallery · CircuitDeck" />
+    <meta property="og:description" content="Every CircuitDeck project in one place: ESP32 lessons, Raspberry Pi 5 projects and sandbox starter circuits." />
+    <meta property="og:url" content="https://circuitdeck.vercel.app/gallery/" />
+    <meta property="og:image" content="https://circuitdeck.vercel.app/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" href="/gallery/data.json" as="fetch" crossorigin />
+    <link rel="stylesheet" href="/shared/gallery.css" />
+    <link rel="stylesheet" href="/shared/cd.css" />
+    <script src="/shared/chrome.js" defer></script>
+    <script src="/gallery/gallery.js" defer></script>
+  </head>
+  <body>
+    <header class="g-top">
+      <a class="brand" href="/" aria-label="CircuitDeck home (ESP32 track)">
+        <svg class="brand-logo" viewBox="0 0 88 70" aria-hidden="true"><g><path class="waves" d="M32 15h24a9 9 0 0 1 9 9v22a9 9 0 0 1-9 9H32a9 9 0 0 1-9-9V24a9 9 0 0 1 9-9zM6 27h7M6 43h7M75 27h7M75 43h7" /><circle class="dot" cx="44" cy="35" r="6.5" /></g></svg>
+        <div class="brand-text"><h1>Circuit<span>Deck</span></h1><p>Explore <i>·</i> Build <i>·</i> Connect <i>·</i> Create</p></div>
+      </a>
+      <div data-cd-chrome></div>
+    </header>
+    <main>
+      <section class="g-hero">
+        <h2>Gallery</h2>
+        <p>Every lesson, project and starter circuit in one place. Pick a track, filter by difficulty, and open any card to build it in 3D.</p>
+        <div class="g-tracks">
+          <a class="g-track" href="/"><b>ESP32</b><span><em id="n-esp32">20</em> lessons · Arduino C++ · Wi-Fi &amp; Bluetooth</span></a>
+          <a class="g-track" href="/pi5/"><b>Raspberry Pi 5</b><span><em id="n-pi5">29</em> projects · Python · camera &amp; AI Kit</span></a>
+          <a class="g-track" href="/sandbox/"><b>Sandbox</b><span><em id="n-sandbox">12</em> starter circuits · build your own</span></a>
+        </div>
+      </section>
+      <div class="g-filters" role="search">
+        <div class="g-group" role="group" aria-label="Track" data-filter="track">
+          <span>Track</span>
+          <button class="chip" data-v="all" aria-pressed="true">All</button>
+          <button class="chip" data-v="esp32" aria-pressed="false">ESP32</button>
+          <button class="chip" data-v="pi5" aria-pressed="false">Pi 5</button>
+          <button class="chip" data-v="sandbox" aria-pressed="false">Sandbox</button>
+        </div>
+        <div class="g-group" role="group" aria-label="Difficulty" data-filter="level">
+          <span>Level</span>
+          <button class="chip" data-v="all" aria-pressed="true">All</button>
+          <button class="chip" data-v="Beginner" aria-pressed="false">Beginner</button>
+          <button class="chip" data-v="Intermediate" aria-pressed="false">Intermediate</button>
+          <button class="chip" data-v="Advanced" aria-pressed="false">Advanced</button>
+        </div>
+        <label class="g-search"><span class="g-count" id="g-count" aria-live="polite"></span><input type="search" id="g-q" placeholder="Search projects, parts, topics" aria-label="Search" /></label>
+      </div>
+      <div class="g-grid" id="g-grid"></div>
+      <p class="g-empty" id="g-empty" hidden>Nothing matches those filters.</p>
+      <noscript><p class="g-empty">Turn on JavaScript to browse the gallery.</p></noscript>
+    </main>
+    <footer class="g-foot">
+      <a class="g-credit" href="https://x.com/DilumSanjaya" target="_blank" rel="noopener noreferrer">Based on Learn ESP32 by Dilum Sanjaya</a>
+    </footer>
+  </body>
+</html>

@@ -24,6 +24,10 @@
 - Tested (pw/sb-test.mjs, sb-click.mjs): 12 templates 0 errors/0 warnings and run; share + export/import roundtrip identical; bad JSON rejected; board switch remaps; click wiring works; 0 console errors.
 - Also: stage.js gives pin dots pick priority; buildEsp32 gains physPoint(); pi5 wire labels used pin .name → fixed to .n.
 
-## M4 — Gallery (/gallery/) — todo
+## M4 — Gallery (/gallery/) — done
+- gallery/index.html + gallery/gallery.js + shared/gallery.css: 61 cards (20 ESP32 lessons, 29 Pi 5 projects, 12 sandbox templates), track/difficulty/text filters kept in the query string, done ticks from progress, light/dark, mobile 2-col.
+- gallery/data.json built by _tools/gallery-data.mjs; ESP32 thumbs captured from the live ESP32 lesson strip (_tools/esp-thumbs.mjs) into gallery/thumbs/esp32/. ESP32 difficulty tags are CircuitDeck's own (gallery only; ESP32 track untouched).
+
+
 ## M5 — tests — todo
 ## M6 — deploy — todo
