@@ -22,5 +22,5 @@ class H(http.server.SimpleHTTPRequestHandler):
     def list_directory(self, path): self.send_error(404)
 if __name__ == '__main__':
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-    print(f'Learn ESP32 local copy: http://localhost:{port}/')
+    print(f'CircuitDeck local server: http://localhost:{port}/')
     http.server.ThreadingHTTPServer(('0.0.0.0', port), H).serve_forever()
