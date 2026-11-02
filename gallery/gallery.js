@@ -7,7 +7,9 @@
   const count = document.getElementById('g-count');
   const q = document.getElementById('g-q');
   const params = new URLSearchParams(location.search);
-  const state = { track: params.get('track') || 'all', level: params.get('level') || 'all', q: params.get('q') || '' };
+  // m8: only known values (any case); anything else falls back to "all"
+  const pick = (v, list) => list.find((x) => x.toLowerCase() === String(v || '').trim().toLowerCase()) || 'all';
+  const state = { track: pick(params.get('track'), Object.keys(TRACK)), level: pick(params.get('level'), ['Beginner', 'Intermediate', 'Advanced']), q: (params.get('q') || '').slice(0, 80) };
   const readDone = (k) => { try { const v = JSON.parse(localStorage.getItem(k) || '[]'); return new Set(Array.isArray(v) ? v : Object.keys(v || {})); } catch { return new Set(); } };
   const done = { esp32: readDone('learn-esp32:done'), pi5: readDone('circuitdeck:pi5:done'), sandbox: new Set() };
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

@@ -62,6 +62,12 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar, rigEl }
   controls.maxZoom = 600;
   controls.maxPolarAngle = Math.PI * 0.47;
   controls.screenSpacePanning = true;
+  // same mouse mapping as the ESP32 stage: left or right drag pans, middle drag
+  // rotates; one finger pans, two fingers pinch-zoom and pan
+  controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.PAN };
+  controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+  canvas.addEventListener('auxclick', (e) => { if (e.button === 1) e.preventDefault(); });
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // image-based light, as on the ESP32 stage
   try {
@@ -260,14 +266,42 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar, rigEl }
     else if (v === 'out') zoom(1.33);
     else if (v === 'reset') reset();
   });
+  // keyboard, as on the ESP32 stage: WASD / arrow keys pan while held, Q / E
+  // rotate, + / - zoom, R resets
+  const PAN_KEYS = { KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1], KeyA: [-1, 0], ArrowLeft: [-1, 0], KeyD: [1, 0], ArrowRight: [1, 0] };
+  const held = new Set();
+  const scrollable = (el) => !!el && el !== document.body && el.nodeType === 1 && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) && /auto|scroll/.test(getComputedStyle(el).overflow);
   addEventListener('keydown', (e) => {
-    if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const a = document.activeElement;
+    if (e.target.closest?.('input, textarea, select, [contenteditable]') || a?.matches?.('input, textarea, select, [contenteditable]')) return;
+    if (PAN_KEYS[e.code]) {
+      // arrows keep their job in tab lists, radio groups, strips and scroll boxes
+      if (e.code.startsWith('Arrow') && (a?.closest?.('[role=tab], [role=radio], [role=slider], .lesson-list, .flyout, .cd-chrome') || scrollable(a))) return;
+      held.add(e.code); anim = null; e.preventDefault();
+      return;
+    }
+    if (e.repeat) return;
     if (e.key === 'q' || e.key === 'Q') rotate(Math.PI / 4);
     else if (e.key === 'e' || e.key === 'E') rotate(-Math.PI / 4);
     else if (e.key === '+' || e.key === '=') zoom(0.75);
-    else if (e.key === '-') zoom(1.33);
+    else if (e.key === '-' || e.key === '_') zoom(1.33);
     else if (e.key === 'r' || e.key === 'R') reset();
   });
+  addEventListener('keyup', (e) => held.delete(e.code));
+  addEventListener('blur', () => held.clear());
+  const PAN_SPEED = 520; // screen px per second
+  function keyPan(dt) {
+    if (!held.size) return;
+    let x = 0, y = 0;
+    for (const k of held) { x += PAN_KEYS[k][0]; y += PAN_KEYS[k][1]; }
+    if (!x && !y) return;
+    const n = Math.hypot(x, y), step = (PAN_SPEED * dt) / camera.zoom;
+    camera.updateMatrixWorld();
+    const d = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).multiplyScalar((x / n) * step)
+      .addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), (-y / n) * step);
+    camera.position.add(d); controls.target.add(d);
+  }
 
   // ------------------------------------------------------------------ picking
   const ray = new THREE.Raycaster();
@@ -356,18 +390,34 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar, rigEl }
     if (!tags.length) return;
     const W = canvas.clientWidth, H = canvas.clientHeight;
     const ox = canvas.offsetLeft, oy = canvas.offsetTop;
+    const pos = [];
     for (const t of tags) {
       if (t.anchor.isObject3D) t.anchor.getWorldPosition(v); else v.copy(t.anchor);
       v.project(camera);
       const x = ox + (v.x + 1) / 2 * W, y = oy + (1 - v.y) / 2 * H;
       const hidden = v.z > 1 || x < -40 || x > W + 40 || y < -40 || y > H + 40;
       t.btn.classList.toggle('is-hidden', hidden);
-      if (!t.w) t.w = t.btn.offsetWidth || 80;
+      if (!t.w) { t.w = t.btn.offsetWidth || 80; t.h = t.btn.offsetHeight || 26; }
       const lift = t.lift ?? 46;
-      const tx = Math.max(4, Math.min(W - t.w - 4, x - t.w / 2)), ty = Math.max(4, y - lift - 26);
+      pos.push({ t, x, y, hidden, tx: Math.max(4, Math.min(W - t.w - 4, x - t.w / 2)), ty: Math.max(4, y - lift - 26) });
+    }
+    // m14: no overlapping tags — lower anchors first, later ones step up (or down at the top edge)
+    const placed = [];
+    for (const p of [...pos].sort((a, b) => b.y - a.y)) {
+      if (p.hidden) continue;
+      const h = p.t.h || 26;
+      for (let n = 0; n < 8; n++) {
+        const hit = placed.find((q) => p.tx < q.tx + q.t.w + 4 && q.tx < p.tx + p.t.w + 4 && p.ty < q.ty + (q.t.h || 26) + 3 && q.ty < p.ty + h + 3);
+        if (!hit) break;
+        const up = hit.ty - h - 4;
+        p.ty = up >= 4 ? up : hit.ty + (hit.t.h || 26) + 4;
+      }
+      placed.push(p);
+    }
+    for (const { t, x, y, tx, ty } of pos) {
       t.btn.style.transform = `translate(${tx}px, ${ty}px)`;
       t.hs.setAttribute('transform', `translate(${x} ${y})`);
-      t.path.setAttribute('d', `M${x} ${y} L${x} ${ty + 26}`);
+      t.path.setAttribute('d', `M${x} ${y} L${x} ${ty < y ? ty + (t.h || 26) : ty}`);
     }
   }
   function setTagsVisible(on) { tagsEl.classList.toggle('is-off', !on); leadersEl.classList.toggle('is-off', !on); }
@@ -510,6 +560,7 @@ export function createStage({ canvas, tagsEl, leadersEl, tipEl, viewbar, rigEl }
       camera.updateProjectionMatrix();
       if (k >= 1) anim = null;
     }
+    keyPan(dt);
     controls.update();
     for (const f of ticks) f(t, dt);
     if (now > layerCheck) { layerCheck = now + 400; assignLayers(); }

@@ -62,10 +62,14 @@ export async function encodeShare(c) {
 export async function decodeShare(hash) {
   const h = hash.replace(/^#/, '');
   let bytes;
-  if (h.startsWith('c=')) bytes = await pipe(unb64u(h.slice(2)), new DecompressionStream('deflate-raw'));
-  else if (h.startsWith('j=')) bytes = unb64u(h.slice(2));
-  else return null;
-  return validate(JSON.parse(new TextDecoder().decode(bytes)));
+  let raw;
+  try {
+    if (h.startsWith('c=')) bytes = await pipe(unb64u(h.slice(2)), new DecompressionStream('deflate-raw'));
+    else if (h.startsWith('j=')) bytes = unb64u(h.slice(2));
+    else return null;
+    raw = JSON.parse(new TextDecoder().decode(bytes));
+  } catch { throw new Error('The link looks incomplete or damaged.'); }
+  return validate(raw);
 }
 
 // ---- localStorage
@@ -73,7 +77,7 @@ const get = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON
 const put = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
 export function loadCurrent() { const raw = get(CUR_KEY, null); if (!raw) return null; try { return validate(raw); } catch { return null; } }
 export function saveCurrent(c) { return put(CUR_KEY, JSON.parse(serialize(c))); }
-export function listSaves() { const s = get(SAVES_KEY, []); return Array.isArray(s) ? s.filter((x) => x && x.circuit) : []; }
+export function listSaves() { const s = get(SAVES_KEY, []); return Array.isArray(s) ? s.filter((x) => x && typeof x === 'object' && x.circuit && typeof x.circuit === 'object' && typeof x.name === 'string') : []; }
 export function saveNamed(c) {
   const saves = listSaves().filter((s) => s.name !== c.name);
   saves.unshift({ name: c.name, at: Date.now(), circuit: JSON.parse(serialize(c)) });

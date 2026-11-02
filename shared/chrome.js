@@ -96,6 +96,29 @@
   }
   window.addEventListener('cd-sound', syncSound);
   window.CircuitDeck = { getTheme, setTheme };
+  // ESP32 track: the original bundle ignores an unknown #lesson and keeps showing the
+  // previous lesson, leaving the bad hash in the address bar. Point the URL back at
+  // the lesson on screen (overlay only; the bundle itself is untouched).
+  if (current() === 'esp32') {
+    const IDS = ['board', 'blink', 'button', 'wifi', 'sound', 'piano', 'knob', 'rgb', 'light', 'sensor', 'motor', 'servo', 'bluetooth', 'espnow', 'project', 'pump', 'keypad', 'solar', 'radar', 'stepper'];
+    const shown = () => {
+      const items = [...document.querySelectorAll('.lesson-list .lesson, .lesson')];
+      const i = items.findIndex((e) => e.classList.contains('is-active'));
+      return items.length === IDS.length && i >= 0 ? IDS[i] : IDS[0];
+    };
+    const fixHash = () => {
+      let id = location.hash.slice(1);
+      try { id = decodeURIComponent(id); } catch {}
+      if (!id || IDS.includes(id)) return;
+      history.replaceState(history.state, '', location.pathname + location.search + '#' + shown());
+    };
+    window.addEventListener('hashchange', () => setTimeout(fixHash, 0));
+    const boot = () => {
+      if (!document.querySelector('.lesson.is-active')) return setTimeout(boot, 200);
+      fixHash();
+    };
+    if (location.hash) setTimeout(boot, 0);
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();
   // the theme may change in another tab

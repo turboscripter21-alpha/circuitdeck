@@ -80,3 +80,39 @@ html[data-theme=dark] .schematic-card .sch-head h2{color:#0f2239}
 html[data-theme=dark] .loader:before{opacity:.35}
 @media (max-width:480px){html.compact .brand-text p{display:none}}
 
+
+/* ---------- M9 / m17: text contrast (WCAG AA, 4.5:1 text, 3:1 large text) ----------
+   Overlay only: redefines a few colour tokens and hard-coded text colours. The
+   accent orange stays for fills, borders and icons; text and white-on-orange
+   surfaces use a deeper orange so they stay legible in both themes. */
+:root:not([data-theme=dark]){--muted:#63676c;--faint:#6f655a;--accent-deep:#b5400c}
+:root:not([data-theme=dark]) .brand-text p{color:#66696b}
+:root:not([data-theme=dark]) .clock{color:#6f6a63}
+:root:not([data-theme=dark]) .tabs button{color:#65696d}
+:root:not([data-theme=dark]) .brand-text h1 span,:root:not([data-theme=dark]) .brand-text p i{color:#b5400c}
+:root:not([data-theme=dark]) .tabs button.is-active,:root:not([data-theme=dark]) .tabs button[aria-selected=true]{color:#b5400c}
+html[data-theme=dark]{--faint:#8a93a0}
+html .cd-tracks a[aria-current=page]{background:linear-gradient(180deg,#cf4d10,#b8400c)}
+html .chip[aria-pressed=true],html .cd-btn.is-down,html .cd-btn:active{background:#b8400c;border-color:#b8400c;color:#fff}
+.lvl-Beginner{color:#1d7a64}.lvl-Intermediate{color:#946000}.lvl-Advanced{color:#b8341d}
+html[data-theme=dark] .lvl-Beginner{color:#4fd1ae}html[data-theme=dark] .lvl-Intermediate{color:#f0b54a}html[data-theme=dark] .lvl-Advanced{color:#ff8a72}
+html .sb-status.is-ok{color:#1f7a4f}html[data-theme=dark] body .sb-status.is-ok{color:#4fd19a}
+html[data-theme=dark] body .cd-btn.cd-danger{color:#ff7a66}
+
+/* ---------- M9 / m18: touch targets of at least 24x24 px (WCAG 2.5.8) ----------
+   The desktop artboard is scaled to the window (about 0.82 at 1280 wide), so the
+   boxes below are 30 px before scaling. The icons keep their size and negative
+   margins keep the surrounding layout where it was. */
+.sch-grip{width:30px;height:30px;margin:-7px 0 -9px -8px}
+.sch-close{width:30px;height:30px;margin:-7px -8px -9px auto}
+.expand{width:30px;height:30px;top:19px;right:15px;display:grid;place-items:center}
+.console-close{width:30px;height:30px;margin:-4px}
+.console-grip{height:30px;top:-15px}
+.console-grip:after{top:13px}
+.tag{min-height:30px}
+html.compact .tag{min-height:24px}
+html.compact .console-close{width:28px;height:28px;margin:-3px}
+.sb-status a[data-act=checks]{display:inline-block;padding:9px 6px;margin:-9px -6px}
+.cd-btn{min-height:30px}
+.cd-in input[type=range]{height:30px;margin:0}html.compact .cd-in input[type=range]{height:26px}
+.sb-name input{min-height:30px}

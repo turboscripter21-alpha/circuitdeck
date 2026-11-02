@@ -72,3 +72,36 @@
 - 01:08 IST: smoke all PASS, ERRORS 0. Next thumbs.
 - 01:14 IST: thumbs regenerated (pi5 29, sandbox 12). assets/ unchanged. Committing v2.
 - 01:16 IST: committed v2 as 9b1f9ba, pushed (b83e32f..9b1f9ba, no force); stash@{0} M8 WIP untouched. Deployed git archive of 9b1f9ba to prod (dpl_2btqyp9ekJ4jBY1jsHndf7hJTA6c, aliased circuitdeck.vercel.app). Live verified, 0 console errors: _compare/phase2/pi5model/v2-live-side-by-side.png, v2-live-pi5-desktop-light/-dark.png, v2-live-pi5-mobile-light.png, v2-live-esp32-desktop-light.png. Pi 5 v2 DONE. Next: M8 AI (stash@{0}), started separately by the user.
+
+## M9 bug fixes (started 01:16 IST Nov 3)
+Source: /workspace/learn-esp32-local-bugs/BUGS.md (3 major, 20 minor). ESP32 bundle (assets/) untouched; stash@{0} untouched.
+
+### M9 per-bug status (from git diff review, 02:10 IST Nov 3)
+| Bug | Status | Where |
+|---|---|---|
+| M1 share/template link overwrites autosave | done | sandbox/main.js keepUnsaved(): unsaved work auto-kept in My saves + notice; untouched loads tracked via `circuitdeck:sandbox:pristine` so plain template hops add no clutter |
+| M2 camera help/WASD/drag buttons | done | core/stage.js (left/right pan, middle rotate, WASD/arrow keyPan); text in pi5 + sandbox |
+| M3 Pi 5 Components flyout stale | done | pi5/main.js show() re-renders open flyout |
+| m1 save with existing name replaces silently | done | confirm() before overwrite |
+| m2 Space on template card runs it | done | ui.js stopPropagation + skip list (sandbox, pi5) |
+| m3 parts search no-results | done | sandbox flyout hides empty .sb-cat + message |
+| m4 malformed share link raw errors | done | store.decodeShare + friendly notice |
+| m5 corrupted saves "Invalid Date" | done | store.listSaves filter + saveMeta |
+| m6 nudge unbounded | done | clamp to ±58 |
+| m7 gallery ESP32 search/descriptions | done | gallery/data.json (short + topics) |
+| m8 gallery invalid/lowercase query | done | gallery.js normalise params |
+| m9 search placeholder cut off | done | gallery.css width 272px |
+| m10 "Put everything back" late | done | pi5 syncPartsFly |
+| m11 Pi 5 invalid hash kept | done | replaceState to current project |
+| m12 Pi 5 reset without confirm | done | confirm() |
+| m13 Pi 5 phone first card clipped | done | ui.js setActive scroll |
+| m14 sandbox phone tag overlap | done | stage.js tag collision avoidance |
+| m15 ESP32 lesson names mismatch | partial | gallery titles now match lesson pages; ESP32 strip card titles live in the bundle (not touched) |
+| m16 board switch deletes Pi-only parts | done | undo-board notice |
+| m17 contrast < AA | done | shared/cd.css overlay (applies to ESP32 page too) |
+| m18 targets < 24px | done | shared/cd.css overlay (30px boxes, desktop artboard scale ~0.82) |
+| m19 ESP32 unknown hash | done | shared/chrome.js overlay (replaceState to shown lesson) |
+| m20 gallery social meta | done | gallery/index.html og/twitter tags |
+| perf: addWire full rebuild | done | rebuild:'wires' |
+| perf: gallery fonts | done | font preloads |
+Tests: tests/m9-regression.mjs (24 checks), m9-contrast.mjs, m9-targets.mjs, m9-esp-hash.mjs. Bundle (assets/) and stash@{0} untouched.

@@ -399,7 +399,7 @@ function openFly(kind, link) {
       </ul><button class="cd-btn cd-danger" data-reset>Reset Pi 5 progress</button>`, link);
   } else if (kind === 'reference') {
     fly.open('reference', `${flyHead('Reference')}<dl class="cd-ref">
-      <div><dt>Drag · WASD</dt><dd>Pan the view</dd></div><div><dt>Right-drag · Q / E</dt><dd>Rotate</dd></div><div><dt>Scroll · + / −</dt><dd>Zoom</dd></div>
+      <div><dt>Drag · WASD / arrows</dt><dd>Pan the view (left or right button; one finger on touch)</dd></div><div><dt>Middle-drag · Q / E</dt><dd>Rotate</dd></div><div><dt>Scroll · pinch · + / −</dt><dd>Zoom</dd></div>
       <div><dt>R</dt><dd>Reset the view</dd></div><div><dt>Space</dt><dd>Run / stop the program</dd></div><div><dt>[ · ]</dt><dd>Previous / next project</dd></div>
       <div><dt>Click a part</dt><dd>Inspect it (and remove it)</dd></div></dl>
       <p class="cd-note">Pi 5 facts used here: BCM2712, 4 × Cortex-A76 @ 2.4 GHz; RP1 I/O chip; 3.3 V GPIO; 5 V / 5 A USB-C; PCIe 2.0 ×1; two 4-lane MIPI CSI/DSI ports. GPIO code uses <code>gpiozero</code> (lgpio backend) — <code>RPi.GPIO</code> and <code>pigpio</code> do not work on the Pi 5.</p>`, link);
@@ -417,15 +417,27 @@ $('#flyout').addEventListener('click', (e) => {
   const g = e.target.closest('[data-go]');
   if (g) { fly.close(); go(g.dataset.go); return; }
   if (e.target.closest('[data-restore]')) { removed.clear(); rebuild(); fly.close(); openFly('parts', $('[data-nav=parts]')); return; }
-  if (e.target.closest('[data-reset]')) { done.clear(); storeSet(DONE_KEY, []); strip.setDone(done); prog.set(0, PROJECTS.length); }
+  if (e.target.closest('[data-reset]')) {
+    if (!done.size) return;
+    if (!confirm(`Reset your Pi 5 progress? This clears ${done.size} completed project${done.size > 1 ? 's' : ''} and cannot be undone.`)) return;
+    done.clear(); storeSet(DONE_KEY, []); strip.setDone(done); prog.set(0, PROJECTS.length); }
 });
 $('#flyout').addEventListener('change', (e) => {
   const c = e.target;
-  if (c.dataset.part) { togglePart(c.dataset.part, c.checked); const s = $('#flyout header span'); if (s) s.textContent = `${project.parts.length - removed.size}/${project.parts.length} in use`; }
+  if (c.dataset.part) { togglePart(c.dataset.part, c.checked); syncPartsFly(); }
   if (c.dataset.set === 'labels') { settings.labels = c.checked; stage.setTagsVisible(c.checked); storeSet(SET_KEY, settings); }
   if (c.dataset.set === 'sound') { setSound(c.checked); }
   if (c.dataset.set === 'dark') window.CircuitDeck?.setTheme(c.checked ? 'dark' : 'light');
 });
+// keeps an open Components flyout in step with the circuit: count + restore button
+function syncPartsFly() {
+  if (fly.kind !== 'parts') return;
+  const s = $('#flyout header span'); if (s) s.textContent = `${project.parts.length - removed.size}/${project.parts.length} in use`;
+  const btn = $('#flyout [data-restore]');
+  if (removed.size && !btn) $('#flyout .cd-parts + .cd-note')?.insertAdjacentHTML('afterend', '<button class="cd-btn" data-restore>Put everything back</button>');
+  else if (!removed.size && btn) btn.remove();
+  $('#flyout').querySelectorAll('[data-part]').forEach((x) => { x.checked = !removed.has(x.dataset.part); });
+}
 function togglePart(id, on) {
   if (on) removed.delete(id); else removed.add(id);
   rebuild();
@@ -443,6 +455,8 @@ function rebuild() {
 function go(id) { if (location.hash.slice(1) !== id) location.hash = id; else show(id); }
 function show(id) {
   const p = byId[id] || PROJECTS[0];
+  // an unknown hash falls back to the first project; say so in the URL too
+  if (!byId[id] && location.hash.length > 1) history.replaceState(null, '', `${location.pathname}${location.search}#${p.id}`);
   if (p === project) return;
   stop(false);
   insp.hide();
@@ -454,6 +468,8 @@ function show(id) {
   cc.clear(); cc.closeConsole();
   info.show('overview');
   strip.setActive(p.id);
+  // an open Components / Projects flyout follows the new project
+  if (fly.kind === 'parts' || fly.kind === 'lessons') { const k = fly.kind; fly.close(); openFly(k, $(`[data-nav=${k}]`)); }
   document.title = `${p.title} · Raspberry Pi 5 · CircuitDeck`;
 }
 addEventListener('hashchange', () => show(location.hash.slice(1)));
@@ -462,7 +478,7 @@ addEventListener('keydown', (e) => {
   const i = PROJECTS.indexOf(project);
   if (e.key === '[' && i > 0) go(PROJECTS[i - 1].id);
   else if (e.key === ']' && i < PROJECTS.length - 1) go(PROJECTS[i + 1].id);
-  else if (e.key === ' ' && !e.target.closest('button, a')) { e.preventDefault(); cc.running ? stop(true) : start(); }
+  else if (e.key === ' ' && !e.target.closest('button, a, [role=button], [role=tab], [role=switch]')) { e.preventDefault(); cc.running ? stop(true) : start(); }
 });
 addEventListener('cd-theme', () => drawPreview(0, !previewFn));
 

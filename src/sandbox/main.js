@@ -183,7 +183,13 @@ function buildScene() {
   // dots on every board pin and part pin
   for (const p of pinsOf(circ.board)) { const pt = boardPoint(p.id); if (pt) addDot(p.id, pt, p.phys ? 0.085 : 0.16); }
   for (const part of circ.parts) for (const d of PARTS[part.type].pins) { const ref = `${part.id}.${d.n}`; const pt = endPoint(ref); if (pt) addDot(ref, pt, ['csi', 'pcie', 'fan'].includes(d.role) ? 0.16 : 0.1); }
-  // wires
+  buildWires();
+  board.resetPins?.();
+  buildTags();
+  paintDots();
+}
+// wires on their own, so adding or removing one doesn't rebuild every part (perf)
+function buildWires() {
   circ.wires.forEach(([a, b], i) => {
     const pa = endPoint(a), pb = endPoint(b);
     if (!pa || !pb) return;
@@ -194,8 +200,9 @@ function buildScene() {
       info: { title: ribbon ? 'Ribbon cable' : 'Jumper wire', hint: 'Click to inspect or delete', desc: ribbon ? 'Pi 5 camera/PCIe ports use small FPC connectors and flat cables.' : 'Joins two points of the circuit.', rows: [['From', refLabel(circ, a)], ['To', refLabel(circ, b)]] },
     });
   });
-  board.resetPins?.();
-  // tags
+}
+function buildTags() {
+  const B = BOARDS[circ.board];
   const tags = [{ anchor: worldOf(board.group, new THREE.Vector3(0.8, 1.2, 0.4)), label: B.name, color: circ.board === 'pi5' ? '#c51a4a' : '#2f6fd0', onClick: (e) => inspectAt(boardInfo(), e) }];
   let k = 0;
   for (const part of circ.parts) {
@@ -205,7 +212,6 @@ function buildScene() {
   }
   stage.setTags(tags);
   stage.setTagsVisible(settings.labels);
-  paintDots();
 }
 function boardInfo() {
   return circ.board === 'pi5'
@@ -215,14 +221,16 @@ function boardInfo() {
 
 // ------------------------------------------------------------------ changes
 // Every edit goes through here: re-check, regenerate code, rebuild the scene, autosave.
-function changed({ rebuild = true, keepCam = true } = {}) {
+function changed({ rebuild = true, keepCam = true, undo = null } = {}) {
   const was = !!run;
+  undoBoard = undo;
   stop(false);
   result = analyse(circ);
   genOut = generate(circ, result.conn);
   cc.setCode(genOut.code, genOut.lang);
   $('.code-card header h2').textContent = `Generated code · ${genOut.file}`;
-  if (rebuild) {
+  if (rebuild === 'wires') { stage.clearWires(); buildWires(); board.resetPins?.(); paintDots(); }
+  else if (rebuild) {
     const cam = keepCam ? stage.getView() : null;
     buildScene();
     if (cam) { stage.setView(cam); }
@@ -239,12 +247,33 @@ function changed({ rebuild = true, keepCam = true } = {}) {
   document.title = `${circ.name} · Sandbox · CircuitDeck`;
   if (was) cc.print('Circuit changed — press Run again.', 'cd-dim');
 }
-function load(c, { frame = true } = {}) {
-  circ = store.validate(c);
+// M1: before a template, share link, import or save replaces the circuit, keep
+// the current autosave in My saves unless it is already there or is an
+// untouched template. Returns the name it was kept under, or ''.
+const sameCircuit = (a, b) => { try { return store.serialize(store.validate(a)) === store.serialize(store.validate(b)); } catch { return false; } };
+const PRISTINE_KEY = 'circuitdeck:sandbox:pristine';
+function keepUnsaved() {
+  const cur = store.loadCurrent();
+  if (!cur || (!cur.parts.length && !cur.wires.length)) return '';
+  if (store.listSaves().some((s) => sameCircuit(s.circuit, cur))) return '';
+  if (TEMPLATES.some((t) => { try { return sameCircuit(templateCircuit(t), cur); } catch { return false; } })) return '';
+  // untouched since it was loaded (templates get part positions laid out on load)
+  try { if (localStorage.getItem(PRISTINE_KEY) === store.serialize(cur)) return ''; } catch { /* storage off */ }
+  const d = new Date();
+  const name = `${cur.name.slice(0, 40)} (autosave ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} ${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })})`;
+  return store.saveNamed({ ...cur, name }) ? name : '';
+}
+let kept = '';
+const keptNote = () => (kept ? ` Your previous circuit was kept in My saves as “${kept}”.` : '');
+function load(c, { frame = true, keep = true } = {}) {
+  const next = store.validate(c);
+  kept = keep ? keepUnsaved() : '';
+  circ = next;
   pending = null;
   notice = '';
   insp.hide();
   changed({ keepCam: false });
+  if (keep) { try { localStorage.setItem(PRISTINE_KEY, store.serialize(circ)); } catch { /* storage off */ } }
   if (frame) stage.frame([stage.content, stage.wires], { fill: 0.7 });
   cc.clear(); cc.closeConsole();
 }
@@ -252,7 +281,7 @@ function loadTemplate(id) {
   const t = TEMPLATES.find((x) => x.id === id);
   if (!t) return;
   load(templateCircuit(t));
-  notice = `Loaded the “${t.title}” template. Change anything — it autosaves in this browser.`;
+  notice = `Loaded the “${t.title}” template. Change anything — it autosaves in this browser.${keptNote()}`;
   strip.setActive(id);
   info.show('overview');
 }
@@ -278,12 +307,12 @@ function addWire(a, b) {
   if (circ.wires.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) { flash('Those two pins are already wired.'); return false; }
   if (circ.wires.length >= 300) { flash('That is the 300-wire limit.'); return false; }
   circ.wires.push([a, b]);
-  changed();
+  changed({ rebuild: 'wires' });
   const mine = result.issues.filter((i) => i.sev !== 'info' && i.refs?.some((r) => r === a || r === b));
   flash(mine.length ? `${mine[0].sev === 'error' ? '⚠ ' : ''}${mine[0].msg}` : `Wired ${refLabel(circ, a)} → ${refLabel(circ, b)}`, mine[0]?.sev);
   return true;
 }
-function removeWire(i) { circ.wires.splice(i, 1); insp.hide(); changed(); }
+function removeWire(i) { circ.wires.splice(i, 1); insp.hide(); changed({ rebuild: 'wires' }); }
 let flashT = 0;
 function flash(msg, sev) {
   hint.textContent = msg;
@@ -302,8 +331,10 @@ function remapRef(ref, to) {
   if (p.kind === 'power') return (p.volts > 4 ? pins.find((x) => x.kind === 'power' && x.volts > 4) : pins.find((x) => x.kind === 'power' && x.volts < 4))?.id || null;
   return pins.some((x) => x.id === ref) ? ref : null;
 }
+let undoBoard = null;
 function setBoard(to) {
   if (to === circ.board || !BOARDS[to]) return;
+  const before = JSON.parse(store.serialize(circ));
   const dropped = circ.parts.filter((p) => to !== 'pi5' && piOnly(p.type));
   const gone = new Set(dropped.map((p) => p.id));
   let lost = 0;
@@ -317,8 +348,15 @@ function setBoard(to) {
   if (to === 'pi5') for (const p of circ.parts) if (p.type === 'cooler') place(p);
   notice = `Switched to the ${BOARDS[to].name}.${dropped.length ? ` Removed ${dropped.map((p) => PARTS[p.type].name).join(', ')} (Pi 5 only).` : ''}${lost ? ` Dropped ${lost} wire${lost > 1 ? 's' : ''} that had no matching pin.` : ''} Power and ground wires moved to the nearest equivalent pins — run the checks again.`;
   pending = null;
-  changed({ keepCam: false });
+  changed({ keepCam: false, undo: dropped.length || lost ? before : null });
   stage.frame([stage.content, stage.wires], { fill: 0.7 });
+}
+function undoBoardSwitch() {
+  if (!undoBoard) return;
+  const c = undoBoard;
+  load(c, { keep: false });
+  notice = `Board switch undone — back on the ${BOARDS[circ.board].name} with every part and wire.`;
+  info.show('overview');
 }
 
 // ------------------------------------------------------------------ picking + inspector
@@ -343,7 +381,7 @@ $('#inspector').addEventListener('click', (e) => {
   if (!t) return;
   if (t.dataset.remove) removePart(t.dataset.remove);
   else if (t.dataset.wire != null) removeWire(+t.dataset.wire);
-  else if (t.dataset.nudge) { const p = partById(t.dataset.id); const [dx, dz] = t.dataset.nudge.split(',').map(Number); if (p.type === 'cooler') return; p.x = +(p.x + dx * 0.5).toFixed(2); p.z = +(p.z + dz * 0.5).toFixed(2); changed(); }
+  else if (t.dataset.nudge) { const p = partById(t.dataset.id); const [dx, dz] = t.dataset.nudge.split(',').map(Number); if (p.type === 'cooler') return; const nx = +(p.x + dx * 0.5).toFixed(2), nz = +(p.z + dz * 0.5).toFixed(2); if (Math.abs(nx) > 58 || Math.abs(nz) > 58) { flash('That is the edge of the workbench.'); return; } p.x = nx; p.z = nz; changed(); }
   else if (t.dataset.rot) { const p = partById(t.dataset.rot); p.rot = ((p.rot || 0) + 90) % 360; changed(); }
 });
 $('#inspector').addEventListener('change', (e) => {
@@ -392,7 +430,7 @@ function renderTab(name) {
   const errs = result.issues.filter((i) => i.sev === 'error'), warns = result.issues.filter((i) => i.sev === 'warn');
   if (name === 'overview') {
     return `<h2>Your circuit</h2>
-      ${notice ? `<p class="sb-notice">${esc(notice)}</p>` : ''}
+      ${notice ? `<p class="sb-notice">${esc(notice)}${undoBoard ? ' <button type="button" class="cd-btn sb-undo" data-act="undo-board">Undo</button>' : ''}</p>` : ''}
       <label class="sb-name"><span>Name</span><input type="text" data-act="name" maxlength="60" value="${esc(circ.name)}"></label>
       <div class="sb-boards" role="group" aria-label="Board">${Object.entries(BOARDS).map(([k, b]) => `<button type="button" class="cd-btn${k === circ.board ? ' is-down' : ''}" data-board="${k}" aria-pressed="${k === circ.board}">${esc(b.name)}</button>`).join('')}</div>
       <p class="sb-status ${errs.length ? 'is-bad' : 'is-ok'}">${errs.length ? `${ICONS.warn}${errs.length} error${errs.length > 1 ? 's' : ''} to fix before it can run` : `${ICONS.check}No errors — press Run`}${warns.length ? ` · ${warns.length} warning${warns.length > 1 ? 's' : ''}` : ''} · <a href="#" data-act="checks">see checks</a></p>
@@ -450,8 +488,11 @@ infoContent.addEventListener('click', async (e) => {
   if (b.dataset.delwire != null) return removeWire(+b.dataset.delwire);
   const act = b.dataset.act;
   if (act === 'checks') info.show('example');
+  else if (act === 'undo-board') undoBoardSwitch();
   else if (act === 'add') openFly('parts', $('[data-nav=parts]'));
-  else if (act === 'save') { notice = store.saveNamed(circ) ? `Saved “${circ.name}”. Find it under Templates → My saves.` : 'Could not save — browser storage is full or blocked.'; info.show('overview'); }
+  else if (act === 'save') {
+    if (store.listSaves().some((s) => s.name === circ.name) && !confirm(`“${circ.name}” is already in My saves. Replace it?`)) { notice = 'Not saved — rename the circuit to keep both versions.'; info.show('overview'); return; }
+    notice = store.saveNamed(circ) ? `Saved “${circ.name}”. Find it under Templates → My saves.` : 'Could not save — browser storage is full or blocked.'; info.show('overview'); }
   else if (act === 'share') await share();
   else if (act === 'export') store.download(circ);
   else if (act === 'import') fileIn.click();
@@ -477,7 +518,7 @@ function importJSON(text) {
   let raw;
   try { raw = JSON.parse(text); } catch { throw new Error('Not valid JSON.'); }
   load(raw);
-  notice = `Imported “${circ.name}”.`;
+  notice = `Imported “${circ.name}”.${keptNote()}`;
   info.show('overview');
 }
 async function share() {
@@ -587,13 +628,19 @@ function resetStates() {
 
 // ------------------------------------------------------------------ flyouts
 const CATS = ['Output', 'Input', 'Sensor', 'Display', 'Motion', 'Passive', 'Interface', 'Power', 'Pi 5'];
+// m5: a damaged save still gets a readable line
+function saveMeta(s) {
+  const board = BOARDS[s.circuit?.board]?.short || 'Unknown board';
+  const d = new Date(s.at);
+  return Number.isFinite(s.at) && !Number.isNaN(d.getTime()) ? `${board} · ${d.toLocaleString()}` : `${board} · date unknown`;
+}
 function flyHead(title, extra = '') { return `<header><h2>${title}</h2>${extra ? `<span>${extra}</span>` : ''}</header>`; }
 function openFly(kind, link) {
   if (kind === 'lessons') {
     const saves = store.listSaves();
     fly.open('lessons', `${flyHead('Starter templates', `${TEMPLATES.length}`)}<ol class="fly-list">${TEMPLATES.map((t) => `
       <li><button data-tpl="${t.id}"><span class="fly-num">${t.board === 'pi5' ? 'Pi' : 'E'}</span><span class="fly-text"><b>${esc(t.title)}</b><small>${esc(BOARDS[t.board].short)} · ${esc(t.difficulty)} · ${esc(t.blurb)}</small></span></button></li>`).join('')}</ol>
-      <h3 class="cd-h3">My saves</h3>${saves.length ? `<ul class="fly-list">${saves.map((s, i) => `<li class="sb-save"><button data-load="${i}"><span class="fly-text"><b>${esc(s.name)}</b><small>${esc(BOARDS[s.circuit.board]?.short || '')} · ${new Date(s.at).toLocaleString()}</small></span></button><button class="cd-btn sb-x" data-delsave="${i}" aria-label="Delete ${esc(s.name)}">${ICONS.close}</button></li>`).join('')}</ul>` : '<p class="cd-note">Nothing saved yet — use Save on the Circuit tab.</p>'}`, link);
+      <h3 class="cd-h3">My saves</h3>${saves.length ? `<ul class="fly-list">${saves.map((s, i) => `<li class="sb-save"><button data-load="${i}"><span class="fly-text"><b>${esc(s.name)}</b><small>${esc(saveMeta(s))}</small></span></button><button class="cd-btn sb-x" data-delsave="${i}" aria-label="Delete ${esc(s.name)}">${ICONS.close}</button></li>`).join('')}</ul>` : '<p class="cd-note">Nothing saved yet — use Save on the Circuit tab.</p>'}`, link);
   } else if (kind === 'parts') {
     const by = (cat) => Object.entries(PARTS).filter(([, d]) => d.cat === cat);
     fly.open('parts', `${flyHead('Components', `${circ.parts.length} in circuit`)}
@@ -610,7 +657,7 @@ function openFly(kind, link) {
     fly.open('reference', `${flyHead('Reference')}<dl class="cd-ref">
       <div><dt>Click pin, then pin</dt><dd>Add a wire</dd></div><div><dt>Esc</dt><dd>Cancel a wire</dd></div><div><dt>Click a wire</dt><dd>Inspect / delete it</dd></div>
       <div><dt>Click a part</dt><dd>Move, rotate, change value, remove</dd></div>
-      <div><dt>Drag · WASD</dt><dd>Pan the view</dd></div><div><dt>Right-drag · Q / E</dt><dd>Rotate</dd></div><div><dt>Scroll · + / −</dt><dd>Zoom</dd></div><div><dt>R</dt><dd>Reset the view</dd></div><div><dt>Space</dt><dd>Run / stop</dd></div></dl>
+      <div><dt>Drag · WASD / arrows</dt><dd>Pan the view (left or right button; one finger on touch)</dd></div><div><dt>Middle-drag · Q / E</dt><dd>Rotate</dd></div><div><dt>Scroll · pinch · + / −</dt><dd>Zoom</dd></div><div><dt>R</dt><dd>Reset the view</dd></div><div><dt>Space</dt><dd>Run / stop</dd></div></dl>
       <p class="cd-note">Pin dots: gold = GPIO, red = 5 V, orange = 3.3 V, dark = GND, blue = part pins. Both boards use 3.3 V logic — 5 V on a GPIO is flagged as an error.</p>`, link);
   } else if (kind === 'language') {
     fly.open('language', `${flyHead('Language')}<p class="cd-note">The sandbox is in English for now.</p>`, link);
@@ -626,7 +673,7 @@ $('#flyout').addEventListener('click', (e) => {
   const b = e.target.closest('button');
   if (!b) return;
   if (b.dataset.tpl) { fly.close(); loadTemplate(b.dataset.tpl); }
-  else if (b.dataset.load != null) { const s = store.listSaves()[+b.dataset.load]; fly.close(); try { load(s.circuit); notice = `Opened “${circ.name}”.`; info.show('overview'); } catch (err) { notice = `Could not open it: ${err.message}`; info.show('overview'); } }
+  else if (b.dataset.load != null) { const s = store.listSaves()[+b.dataset.load]; fly.close(); try { load(s.circuit); notice = `Opened “${circ.name}”.${keptNote()}`; info.show('overview'); } catch (err) { notice = `Could not open it: ${err.message}`; info.show('overview'); } }
   else if (b.dataset.delsave != null) { const s = store.listSaves()[+b.dataset.delsave]; if (s && confirm(`Delete “${s.name}”?`)) { store.deleteSave(s.name); openFly('lessons', $('[data-nav=lessons]')); } }
   else if (b.dataset.add) { const id = addPart(b.dataset.add); if (id) { openFly('parts', $('[data-nav=parts]')); flash(`Added ${partName(circ, partById(id))} — click its pins to wire it.`); } }
   else if (b.dataset.rm) { removePart(b.dataset.rm); openFly('parts', $('[data-nav=parts]')); }
@@ -635,7 +682,21 @@ $('#flyout').addEventListener('click', (e) => {
 $('#flyout').addEventListener('input', (e) => {
   if (!e.target.matches('.sb-search')) return;
   const q = e.target.value.trim().toLowerCase();
-  $('#flyout').querySelectorAll('.sb-lib li').forEach((li) => { li.hidden = q && !li.dataset.name.includes(q); });
+  const fl = $('#flyout');
+  fl.querySelectorAll('.sb-lib li').forEach((li) => { li.hidden = q && !li.dataset.name.includes(q); });
+  // hide a category heading (and its list) when nothing in it matches
+  fl.querySelectorAll('.sb-lib').forEach((ul) => {
+    const any = [...ul.querySelectorAll('li')].some((li) => !li.hidden);
+    ul.hidden = !any;
+    const h = ul.previousElementSibling;
+    if (h && h.matches('.sb-cat, h3, h4')) h.hidden = !any;
+  });
+  let none = fl.querySelector('.sb-none');
+  const shown = fl.querySelectorAll('.sb-lib li:not([hidden])').length;
+  if (!shown && q) {
+    if (!none) { none = document.createElement('p'); none.className = 'cd-note sb-none'; none.setAttribute('role', 'status'); e.target.after(none); }
+    none.textContent = `No parts match “${e.target.value.trim()}”. Try a part name such as LED, servo or sensor.`;
+  } else none?.remove();
 });
 $('#flyout').addEventListener('change', (e) => {
   const c = e.target;
@@ -645,26 +706,34 @@ $('#flyout').addEventListener('change', (e) => {
 });
 addEventListener('keydown', (e) => {
   if (e.target.closest('input, select, textarea, [contenteditable], .cd-chrome')) return;
-  if (e.key === ' ' && !e.target.closest('button, a')) { e.preventDefault(); cc.running ? stop(true) : start(); }
+  if (e.key === ' ' && !e.target.closest('button, a, [role=button], [role=tab], [role=switch]')) { e.preventDefault(); cc.running ? stop(true) : start(); }
 });
+
+// m4: readable reasons instead of raw browser errors
+function shareError(err) {
+  const m = String(err?.message || '');
+  const why = /^(Not a CircuitDeck|Unsupported circuit|Board must|Circuit needs|Too many|Bad part|Duplicate part|Unknown part|Bad wire)/.test(m) ? m.replace(/\.$/, '')
+    : 'the link looks incomplete or damaged — ask for it to be copied again';
+  return `That share link could not be opened: ${why}. Your own circuit was not changed.`;
+}
 
 // ------------------------------------------------------------------ boot
 async function boot() {
   const h = location.hash;
   if (/^#[cj]=/.test(h)) {
-    try { load(await store.decodeShare(h)); notice = `Opened a shared circuit: “${circ.name}”. Save it to keep your own copy.`; info.show('overview'); history.replaceState(null, '', h); return; } catch (err) { notice = `That share link could not be opened (${err.message}).`; }
+    try { load(await store.decodeShare(h)); notice = `Opened a shared circuit: “${circ.name}”. Save it to keep your own copy.${keptNote()}`; info.show('overview'); history.replaceState(null, '', h); return; } catch (err) { notice = shareError(err); }
   }
   const t = /^#t=([\w-]+)/.exec(h);
   if (t && TEMPLATES.some((x) => x.id === t[1])) { loadTemplate(t[1]); return; }
   const cur = store.loadCurrent();
-  if (cur) { const n = notice; load(cur); notice = n || 'Welcome back — this is the circuit you were working on.'; info.show('overview'); return; }
+  if (cur) { const n = notice; load(cur, { keep: false }); notice = n || 'Welcome back — this is the circuit you were working on.'; info.show('overview'); return; }
   const n = notice;
   loadTemplate('traffic-light');
   if (n) { notice = n; info.show('overview'); }
 }
 addEventListener('hashchange', async () => {
   const h = location.hash;
-  if (/^#[cj]=/.test(h) && !shareUrl.endsWith(h)) { try { load(await store.decodeShare(h)); notice = 'Opened a shared circuit.'; info.show('overview'); } catch (err) { notice = `That share link could not be opened (${err.message}).`; info.show('overview'); } }
+  if (/^#[cj]=/.test(h) && !shareUrl.endsWith(h)) { try { load(await store.decodeShare(h)); notice = `Opened a shared circuit: “${circ.name}”.${keptNote()}`; info.show('overview'); } catch (err) { notice = shareError(err); info.show('overview'); } }
   else if (/^#t=/.test(h)) loadTemplate(h.slice(3));
 });
 await boot();
@@ -676,7 +745,7 @@ requestAnimationFrame(() => requestAnimationFrame(() => {
 }));
 // for tests and the thumbnail script
 window.__sb = {
-  stage, TEMPLATES, loadTemplate, load, addPart, addWire, removePart, removeWire, setBoard, start, stop: () => stop(true), share, importJSON,
+  stage, TEMPLATES, loadTemplate, load, addPart, addWire, removePart, removeWire, setBoard, inspectPart, start, stop: () => stop(true), share, importJSON,
   exportJSON: () => store.serialize(circ), decode: store.decodeShare, setInput,
   get circuit() { return circ; }, get issues() { return result.issues; }, get code() { return genOut; }, get running() { return !!run; }, get insts() { return insts; }, get inputs() { return inputs; }, get dots() { return dots; },
 };

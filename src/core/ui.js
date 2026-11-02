@@ -213,7 +213,8 @@ export function lessonStrip(section, { items, onPick }) {
       <span class="lesson-done" aria-hidden="true">${ICONS.check}</span>
     </div>`).join('');
   list.addEventListener('click', (e) => { const l = e.target.closest('.lesson'); if (l) onPick(l.dataset.id); });
-  list.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.lesson')) { e.preventDefault(); onPick(e.target.dataset.id); } });
+  // Enter / Space open the focused card and stop there (Space must not also run the circuit)
+  list.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.lesson')) { e.preventDefault(); e.stopPropagation(); onPick(e.target.dataset.id); } });
   if (!section.querySelector('.lesson-step')) section.insertAdjacentHTML('beforeend', `<button class="lesson-step prev" aria-label="Earlier projects">${ICONS.prev}</button><button class="lesson-step next" aria-label="More projects">${ICONS.next}</button>`);
   const prev = section.querySelector('.lesson-step.prev'), next = section.querySelector('.lesson-step.next');
   const step = (d) => list.scrollBy({ left: d * list.clientWidth * 0.8, behavior: 'smooth' });
@@ -230,7 +231,12 @@ export function lessonStrip(section, { items, onPick }) {
   new ResizeObserver(update).observe(list);
   return {
     setActive(id) {
-      list.querySelectorAll('.lesson').forEach((l) => { const on = l.dataset.id === id; l.classList.toggle('is-active', on); l.setAttribute('aria-current', on ? 'step' : 'false'); if (on) { const r = l.offsetLeft - list.clientWidth / 2 + l.offsetWidth / 2; list.scrollTo({ left: r, behavior: 'smooth' }); } });
+      list.querySelectorAll('.lesson').forEach((l) => { const on = l.dataset.id === id; l.classList.toggle('is-active', on); l.setAttribute('aria-current', on ? 'step' : 'false'); if (on) {
+        // position relative to the list itself (offsetLeft is relative to the offset parent, which is wrong on the mobile layout)
+        const x = l.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft;
+        const r = Math.max(0, Math.min(list.scrollWidth - list.clientWidth, x - list.clientWidth / 2 + l.offsetWidth / 2));
+        list.scrollTo({ left: r, behavior: 'smooth' });
+      } });
       setTimeout(update, 400);
     },
     setDone(set) { list.querySelectorAll('.lesson').forEach((l) => l.classList.toggle('is-done', set.has(l.dataset.id))); },

@@ -1,0 +1,17 @@
+import { chromium } from 'playwright';
+const BASE = process.env.BASE || 'http://127.0.0.1:8080';
+const b = await chromium.launch({ args: ['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'] });
+const p = await b.newPage({ viewport: { width: 1280, height: 800 } }); const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+const ready = () => p.waitForFunction(()=>!document.documentElement.classList.contains('is-loading'),null,{timeout:120000});
+const st = () => p.evaluate(()=>({hash:location.hash, active:document.querySelector('.lesson.is-active')?.getAttribute('aria-label')}));
+await p.goto(BASE + '/#radar'); await ready(); await p.waitForTimeout(1500); const a = await st();
+await p.evaluate(()=>{location.hash='#nope'}); await p.waitForTimeout(800); const b1 = await st();
+await p.evaluate(()=>{location.hash='#blink'}); await p.waitForTimeout(1500); const c = await st();
+await p.goBack(); await p.waitForTimeout(1500); const d = await st();
+const p2 = await b.newPage({ viewport: { width: 1280, height: 800 } }); p2.on('pageerror',e=>errs.push(e.message)); p2.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+await p2.goto(BASE + '/#zzz'); await p2.waitForFunction(()=>!document.documentElement.classList.contains('is-loading'),null,{timeout:120000}); await p2.waitForTimeout(2500);
+const IDS=['board','blink','button','wifi','sound','piano','knob','rgb','light','sensor','motor','servo','bluetooth','espnow','project','pump','keypad','solar','radar','stepper'];
+const e = await p2.evaluate(()=>({hash:location.hash, active:document.querySelector('.lesson.is-active')?.getAttribute('aria-label')})); e.n=+(e.active||'').match(/Lesson (\d+)/)?.[1];
+const r = { a, b1, c, d, e, errs };
+r.pass = a.hash==='#radar' && b1.hash==='#radar' && /radar/i.test(b1.active) && c.hash==='#blink' && e.hash==='#'+IDS[e.n-1] && errs.length===0;
+console.log(JSON.stringify(r)); await b.close(); process.exit(r.pass?0:1);
