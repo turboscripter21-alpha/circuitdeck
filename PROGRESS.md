@@ -124,3 +124,7 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - 04:05 IST: Pi 5 main.js now track-configurable (CFG; /tinyml reuses it), webcam ML in 4 Pi projects, __cdAIContext, cd-progress event. QR probe with fake y4m decodes live, 0 errors.
 - 22:14 M8: TinyML track — ESP32-S3 CAM board variant (buildEsp32({s3:true}), default unchanged), parts mpu6050/inmp441/ov2640 (cat TinyML, hidden in sandbox), src/tinyml/projects.js (6 projects), /tinyml/ page + thumbs. Probe: all 6 run.
 - 22:15 M8: gallery (TinyML track card, filter chip, tag colour, 4-col tracks), data.json regenerated (+6 tinyml, others unchanged), sitemap, rec: current page's track next +25, vendor/mediapipe README.
+
+### M8 resume — tests (Nov 3, ~3:40 AM IST)
+- tests/m8-ai.mjs: 9 checks with /api/ai mocked (api no-key, tutor not-configured, editor AI help, failure toast→hint, Recommended next, TinyML 6 projects + gallery filter, sandbox Explain with AI, ML camera fake webcam, QR via QR_Y4M).
+- ai.js: skip POST when GET already said not configured (no console 503); own-track rec bonus 25→40.
