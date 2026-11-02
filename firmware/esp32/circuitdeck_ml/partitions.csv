@@ -1,0 +1,7 @@
+# CircuitDeck ML: a 4 MB layout with a 256 KB "cdmodel" partition at 0x3C0000.
+# The browser's "Compile & flash" writes new model blobs there without touching the app.
+# Name,    Type, SubType, Offset,   Size
+nvs,       data, nvs,     0x9000,   0x5000
+phy_init,  data, phy,     0xf000,   0x1000
+factory,   app,  factory, 0x10000,  0x3B0000
+cdmodel,   data, 0x40,    0x3C0000, 0x40000

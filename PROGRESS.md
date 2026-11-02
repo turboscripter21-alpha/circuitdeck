@@ -132,3 +132,8 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - (~5:00 AM IST) Regressions green: m8-ai 9/9 (0 errors), m9-regression 24/24 (0 errors), p2-suite all pass (motor re-run alone after a load timeout; 0 errors), pi-all light+dark 0 FAIL, sb-test/smoke/sound-test exit 0. ESP32 bundle (assets/) unchanged since M9. stash@{0} was already fully applied and dropped (checked against the unreachable stash commit). Next: push, deploy, live check.
 - (~5:05 AM IST) Pushed 83b7235 and deployed it. The first live check found one console 503: sandbox "Explain with AI" sent a POST before the status GET. Fix: ask() checks status first. New m8 test sandbox-explain-not-configured; m8-ai now 10/10 with 0 errors. Committing, pushing and redeploying.
 - (~5:15 AM IST) Deployed 21f60b8 as dpl_J9cZrU1gDdRrnLLbDUxvzJyg8qvm. Live check: GET /api/ai returns {configured:false}, the tutor shows "AI not configured yet", sandbox Explain shows the not-configured note, /tinyml/ runs (6 projects, "Heard: yes"), gallery has 67 items with 6 TinyML, Recommended next shows. 0 console errors. Screenshots in _compare/m8/live-*.png. M8 done.
+
+## M10: Train panel (in progress)
+- Step 1: vendored TF.js 4.22 (tf.fesm.min.js), esptool-js 0.7.1 and MobileNetV2 0.35 (the Teachable Machine weights).
+- Step 2: src/train/{zip,db,spec,sensors,model}.js. Also firmware/esp32/circuitdeck_ml (CDM1 interpreter: int8 weights, float maths, with a cdmodel partition at 0x3C0000) and firmware/pi5 (numpy cdmodel.py + cd_infer.py).
+- Next: flash.js, export.js, panel.js (UI), sandbox hook, CSS, then tests/m10-train.mjs.

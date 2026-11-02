@@ -1,0 +1,9 @@
+numpy
+gpiozero
+# mic models
+sounddevice
+# motion models
+smbus2
+# camera models (the MobileNet feature extractor); on Pi OS Bookworm: pip install tensorflow
+# tensorflow
+# opencv-python
