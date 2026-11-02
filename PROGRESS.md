@@ -136,4 +136,5 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 ## M10: Train panel (in progress)
 - Step 1: vendored TF.js 4.22 (tf.fesm.min.js), esptool-js 0.7.1 and MobileNetV2 0.35 (the Teachable Machine weights).
 - Step 2: src/train/{zip,db,spec,sensors,model}.js. Also firmware/esp32/circuitdeck_ml (CDM1 interpreter: int8 weights, float maths, with a cdmodel partition at 0x3C0000) and firmware/pi5 (numpy cdmodel.py + cd_infer.py).
-- Next: flash.js, export.js, panel.js (UI), sandbox hook, CSS, then tests/m10-train.mjs.
+- 3. (WIP 3) Panel UI `src/train/panel.js` (Data / Train / Test & deploy tabs, `window.__train`), `flash.js` (esptool-js, model blob at 0x3C0000), `export.js` (ESP32 + Pi 5 zips). Sandbox hook: "Train" sidebar item + `#train` / `#train=mic|motion` deep links, host object (outputs / setOutputs / addOutputs / stopSim) in `src/sandbox/main.js`; `shared/train.css`; TinyML sidebar links to `/sandbox/#train`. Probe: panel opens, fake camera Record adds a sample, 0 errors; mobile 390x844 full-screen sheet.
+Next: flash.js, export.js, panel.js (UI), sandbox hook, CSS, then tests/m10-train.mjs.

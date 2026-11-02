@@ -703,8 +703,46 @@ $('.sidebar').addEventListener('click', (e) => {
   const a = e.target.closest('[data-nav]');
   if (!a) return;
   e.preventDefault();
+  if (a.dataset.nav === 'train') { openTrain(); return; }
+  trainMod?.close();
   openFly(a.dataset.nav, a);
 });
+
+// ------------------------------------------------------------------ M10: Train panel
+// Lazy-loaded, so TF.js and MobileNet only download when the panel is opened.
+const OUT_TYPES = ['led', 'relay', 'buzzer'];
+let trainMod = null;
+const trainHost = {
+  outputs: () => circ.parts.filter((p) => OUT_TYPES.includes(p.type)).map((p) => ({ id: p.id, type: p.type, name: partName(circ, p) })),
+  setOutputs(on) {
+    for (const p of circ.parts) {
+      if (!OUT_TYPES.includes(p.type) || !insts[p.id]) continue;
+      insts[p.id].set(p.type === 'buzzer' ? { on: !!on.buzzer, freq: 2300 } : { on: !!on[p.type] });
+    }
+  },
+  // an LED (+330 Ω), a relay module and a buzzer, wired to free pins (ESP32: 26/27/25, Pi 5: 17/27/22)
+  addOutputs() {
+    const pi = circ.board === 'pi5';
+    const used = new Set(circ.wires.flat());
+    const r = addPart('resistor', { ohms: '330' }), led = addPart('led', { color: 'green' }), rel = addPart('relay'), bz = addPart('buzzer');
+    const W = pi
+      ? [['GPIO17', `${r}.1`], [`${r}.2`, `${led}.A`], [`${led}.K`, 'GND@9'], ['5V@2', `${rel}.VCC`], [`${rel}.GND`, 'GND@6'], ['GPIO27', `${rel}.IN`], ['GPIO22', `${bz}.+`], [`${bz}.-`, 'GND@14']]
+      : [['GPIO26', `${r}.1`], [`${r}.2`, `${led}.A`], [`${led}.K`, 'GND@14'], ['VIN', `${rel}.VCC`], [`${rel}.GND`, 'GND@14'], ['GPIO27', `${rel}.IN`], ['GPIO25', `${bz}.+`], [`${bz}.-`, 'GND@29']];
+    for (const [a, b] of W) if (!/^GPIO/.test(a) || !used.has(a)) addWire(a, b);
+    return [r, led, rel, bz];
+  },
+  stopSim: () => stop(false),
+  onClose: () => { resetStates(); if (/^#train/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); },
+};
+async function openTrain(opts = {}) {
+  fly.close();
+  trainMod ||= await import('../train/panel.js');
+  return trainMod.open(trainHost, opts);
+}
+function trainFromHash(h = location.hash) {
+  const m = /^#train(?:=(camera|mic|motion))?/.exec(h);
+  if (m) openTrain({ sensor: m[1] });
+}
 $('#flyout').addEventListener('click', (e) => {
   const b = e.target.closest('button');
   if (!b) return;
@@ -771,8 +809,11 @@ addEventListener('hashchange', async () => {
   const h = location.hash;
   if (/^#[cj]=/.test(h) && !shareUrl.endsWith(h)) { try { load(await store.decodeShare(h)); notice = `Opened a shared circuit: “${circ.name}”.${keptNote()}`; info.show('overview'); } catch (err) { notice = shareError(err); info.show('overview'); } }
   else if (/^#t=/.test(h)) loadTemplate(h.slice(3));
+  else trainFromHash();
 });
+const bootHash = location.hash; // load() clears the hash, so read #train first
 await boot();
+trainFromHash(bootHash);
 requestAnimationFrame(() => requestAnimationFrame(() => {
   document.documentElement.classList.remove('is-loading');
   app.inert = false;
@@ -788,7 +829,7 @@ window.__cdAIContext = () => ({
   issues: result.issues.map((i) => `${SEV[i.sev][0]}: ${i.msg}`).join('\n'),
 });
 window.__sb = {
-  stage, TEMPLATES, loadTemplate, load, addPart, addWire, removePart, removeWire, setBoard, inspectPart, start, stop: () => stop(true), share, importJSON,
+  stage, TEMPLATES, loadTemplate, openTrain, trainHost, load, addPart, addWire, removePart, removeWire, setBoard, inspectPart, start, stop: () => stop(true), share, importJSON,
   exportJSON: () => store.serialize(circ), decode: store.decodeShare, setInput,
   get circuit() { return circ; }, get issues() { return result.issues; }, get code() { return genOut; }, get running() { return !!run; }, get insts() { return insts; }, get inputs() { return inputs; }, get dots() { return dots; },
 };

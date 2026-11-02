@@ -98,3 +98,7 @@ html[data-theme=dark] .console-lines .cd-err{color:#ff8a78}
 .sb-act{display:flex;flex-direction:column;gap:6px}
 .sb-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:6px 0}.sb-keys .cd-btn{justify-content:center;padding:6px 0}
 .cd-warn{color:#b7791f}
+/* M10: sandbox and TinyML sidebars gain a 7th item (Train); the bundle only positions six */
+.side-nav li:nth-child(7){top:560px}
+html.compact .side-nav li:nth-child(7){top:auto}
+html.compact .side-nav:has(li:nth-child(7)) a{max-width:calc((100vw - 14px)/7)}
