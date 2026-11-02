@@ -1,10 +1,10 @@
-# Learn ESP32 — local working copy (republished with permission)
+# Learn ESP32 — local working copy
 
 Faithful offline copy of https://learn-esp32.vercel.app, created by **Dilum Sanjaya** ([x.com/DilumSanjaya](https://x.com/DilumSanjaya)).
 Captured 2 Nov 2026 (deploy last-modified 29 Oct 2026). No design or content changes.
 
 ## Run (full stack)
-    git clone https://github.com/turboscripter21-alpha/javascript21alpha && cd javascript21alpha
+    cd learn-esp32-local
     python3 serve.py 8080
 Then open http://localhost:8080/ (lessons are hash routes, e.g. /#blink, /#piano, /#stepper).
 
@@ -38,6 +38,7 @@ Any static host works. For Vercel, use no framework preset, no build command, an
 ## Layout
 - index.html, 404.html, assets/ (JS chunks, CSS, woff2 fonts), icons, og-image.png, site.webmanifest, robots.txt, sitemap.xml: the site
 - serve.py: the local static server
+- _raw/, _compare/, _tools/: capture and verification material (local only, not part of the site)
 
 ## Routes (hash ids)
 board blink button wifi sound piano knob rgb light sensor motor servo bluetooth espnow project pump keypad solar radar stepper

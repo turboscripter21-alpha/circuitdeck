@@ -1,7 +1,7 @@
 {
-  "name": "Learn ESP32 — interactive 3D lessons",
-  "short_name": "Learn ESP32",
-  "description": "Wire up LEDs, buttons, touch keys, sensors, motors, servos and a stepper on a 3D ESP32, talk to it over Wi-Fi, Bluetooth and ESP-NOW, then run the code and watch it work.",
+  "name": "CircuitDeck — interactive 3D ESP32 & Raspberry Pi 5 projects",
+  "short_name": "CircuitDeck",
+  "description": "Interactive 3D electronics projects for the ESP32 and the Raspberry Pi 5: wire parts on a 3D board, run the code and watch it work, then build your own circuits in the sandbox.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

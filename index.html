@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- CircuitDeck: the saved theme, applied before the first paint (no flash) -->
+    <script>try{if(localStorage.getItem('circuitdeck:theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
     <script>
       // The layout, chosen before anything is drawn (fit() in src/main.js
       // decides the same way, and keeps deciding as the window changes):
@@ -17,14 +19,14 @@
         if (s < 0.62 || vw / vh < 0.95) d.classList.add('compact');
       })();
     </script>
-    <title>Learn ESP32 — interactive 3D lessons for beginners</title>
-    <meta name="description" content="Learn the ESP32 on an interactive 3D board: wire sensors and motors, use Wi-Fi and Bluetooth, then run the code and watch it work. 20 free beginner lessons." />
-    <meta name="author" content="Dilum Sanjaya" />
+    <title>CircuitDeck — interactive 3D ESP32 &amp; Raspberry Pi 5 projects</title>
+    <meta name="description" content="Interactive 3D electronics projects for the ESP32 and the Raspberry Pi 5: wire parts on a 3D board, run the code and watch it work, then build your own circuits in the sandbox." />
+    <meta name="author" content="CircuitDeck" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#f8f1e6" />
     <meta name="color-scheme" content="light" />
-    <meta name="application-name" content="Learn ESP32" />
-    <meta name="apple-mobile-web-app-title" content="Learn ESP32" />
+    <meta name="application-name" content="CircuitDeck" />
+    <meta name="apple-mobile-web-app-title" content="CircuitDeck" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -32,21 +34,20 @@
 
     <!-- link previews (Open Graph, X) -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Learn ESP32" />
+    <meta property="og:site_name" content="CircuitDeck" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:title" content="Learn ESP32 — interactive 3D lessons" />
-    <meta property="og:description" content="Wire up LEDs, buttons, touch keys, sensors, motors, servos and a stepper on a 3D ESP32, talk to it over Wi-Fi, Bluetooth and ESP-NOW, then run the code and watch it work. 20 free beginner lessons." />
+    <meta property="og:title" content="CircuitDeck — interactive 3D ESP32 &amp; Raspberry Pi 5 projects" />
+    <meta property="og:description" content="Interactive 3D electronics projects for the ESP32 and the Raspberry Pi 5: wire parts on a 3D board, run the code and watch it work, then build your own circuits in the sandbox." />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:creator" content="@DilumSanjaya" />
-    <link rel="canonical" href="https://learn-esp32.vercel.app/" />
-    <meta property="og:url" content="https://learn-esp32.vercel.app/" />
-    <meta property="og:image" content="https://learn-esp32.vercel.app/og-image.png" />
+    <link rel="canonical" href="https://circuitdeck.vercel.app/" />
+    <meta property="og:url" content="https://circuitdeck.vercel.app/" />
+    <meta property="og:image" content="https://circuitdeck.vercel.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="An illustrated 3D ESP32 board wired on a breadboard to a distance sensor and a traffic light, with a toy car in front of it" />
-    <meta name="twitter:image" content="https://learn-esp32.vercel.app/og-image.png" />
-    <meta name="twitter:image:alt" content="An illustrated 3D ESP32 board wired on a breadboard to a distance sensor and a traffic light, with a toy car in front of it" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":["WebApplication","LearningResource"],"name":"Learn ESP32","url":"https://learn-esp32.vercel.app/","description":"Learn the ESP32 on an interactive 3D board: wire sensors and motors, use Wi-Fi and Bluetooth, then run the code and watch it work. 20 free beginner lessons.","image":"https://learn-esp32.vercel.app/og-image.png","applicationCategory":"EducationalApplication","operatingSystem":"Any (runs in a web browser with WebGL)","browserRequirements":"Requires JavaScript and WebGL.","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"educationalLevel":"Beginner","learningResourceType":"Interactive lesson","teaches":["Meet the ESP32","Flash two LEDs","Guard the fridge","Use Wi-Fi","Sound a siren","Build a mini piano","Fill a ring of LEDs","Make a mood lamp","Light up in the dark","Distance meter","Drive a wheel","Laser barrier gate","Talk over Bluetooth","Board to board","Smart parking bay","Automatic water pump","Keypad door lock","Sun-tracking solar panel","Ultrasonic radar","Pick and place"],"about":["ESP32","Electronics","Microcontrollers","Wi-Fi","Bluetooth","Programming"],"author":{"@type":"Person","name":"Dilum Sanjaya","url":"https://x.com/DilumSanjaya"}}</script>
+    <meta property="og:image:alt" content="CircuitDeck: 3D ESP32 and Raspberry Pi 5 project tracks and a circuit sandbox" />
+    <meta name="twitter:image" content="https://circuitdeck.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="CircuitDeck: 3D ESP32 and Raspberry Pi 5 project tracks and a circuit sandbox" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":["WebApplication","LearningResource"],"name":"CircuitDeck","url":"https://circuitdeck.vercel.app/","description":"Interactive 3D electronics projects for the ESP32 and the Raspberry Pi 5: wire parts on a 3D board, run the code and watch it work, then build your own circuits in the sandbox.","image":"https://circuitdeck.vercel.app/og-image.png","applicationCategory":"EducationalApplication","operatingSystem":"Any (runs in a web browser with WebGL)","browserRequirements":"Requires JavaScript and WebGL.","inLanguage":"en","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"educationalLevel":"Beginner","learningResourceType":"Interactive lesson","teaches":["Meet the ESP32","Flash two LEDs","Guard the fridge","Use Wi-Fi","Sound a siren","Build a mini piano","Fill a ring of LEDs","Make a mood lamp","Light up in the dark","Distance meter","Drive a wheel","Laser barrier gate","Talk over Bluetooth","Board to board","Smart parking bay","Automatic water pump","Keypad door lock","Sun-tracking solar panel","Ultrasonic radar","Pick and place"],"about":["ESP32","Raspberry Pi 5","Electronics","Microcontrollers","Wi-Fi","Bluetooth","Programming"],"isBasedOn":{"@type":"CreativeWork","name":"Learn ESP32","author":{"@type":"Person","name":"Dilum Sanjaya","url":"https://x.com/DilumSanjaya"}}}</script>
     <!-- linked here rather than imported from main.js, so the first paint
          (the loading screen) is already styled, on the dev server too -->
     <link rel="preload" href="/assets/barlow-semi-condensed-latin-600-normal-BkLiAYu4.woff2" as="font" type="font/woff2" crossorigin />
@@ -56,6 +57,9 @@
     <link rel="preload" href="/assets/barlow-semi-condensed-latin-700-normal-BpqDG8I9.woff2" as="font" type="font/woff2" crossorigin />
     <script type="module" crossorigin src="/assets/index-DO8QxAnQ.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BjWEalAT.css">
+    <!-- CircuitDeck: track switcher, theme toggle and dark theme (an override layer) -->
+    <link rel="stylesheet" href="/shared/cd.css" />
+    <script src="/shared/chrome.js" defer></script>
   </head>
   <body>
     <!-- Covers the page until the board is built and every lesson card has
@@ -64,11 +68,11 @@
       <div class="loader-inner">
         <svg class="loader-logo" viewBox="0 0 88 70" aria-hidden="true">
           <g>
-            <path class="waves" d="M32.5 48.9a16 16 0 0 1 23 0M22.4 39.2a30 30 0 0 1 43.2 0M12.4 29.4a44 44 0 0 1 63.2 0" />
-            <circle class="dot" cx="44" cy="60" r="6" />
+            <path class="waves" d="M32 15h24a9 9 0 0 1 9 9v22a9 9 0 0 1-9 9H32a9 9 0 0 1-9-9V24a9 9 0 0 1 9-9zM6 27h7M6 43h7M75 27h7M75 43h7" />
+            <circle class="dot" cx="44" cy="35" r="6.5" />
           </g>
         </svg>
-        <p class="loader-title">Learn <span>ESP32</span></p>
+        <p class="loader-title">Circuit<span>Deck</span></p>
         <div class="loader-track" aria-hidden="true"><span class="loader-fill"></span><span class="loader-shine"></span></div>
         <p class="loader-step">Loading</p>
         <noscript>
@@ -135,8 +139,8 @@
             <path class="sand" d="M10 194c30-17 66-14 94 4v12H10z" />
           </g>
         </svg>
-        <a class="credit credit-side" href="https://x.com/DilumSanjaya" target="_blank" rel="noopener noreferrer" title="Designed by x.com/DilumSanjaya" data-i18n-attr="title">
-          <span class="credit-text"><small data-i18n>Designed by</small><b>x.com/DilumSanjaya</b></span>
+        <a class="credit credit-side" href="https://x.com/DilumSanjaya" target="_blank" rel="noopener noreferrer" title="Based on Learn ESP32 by Dilum Sanjaya">
+          <span class="credit-text"><small>Based on Learn ESP32 by</small><b>Dilum Sanjaya</b></span>
           <span class="credit-rule" aria-hidden="true"></span>
           <svg class="credit-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.4l-5.8-7.59-6.64 7.59H.47l8.6-9.83L0 1.15h7.6l5.24 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z" /></svg>
         </a>
@@ -147,12 +151,12 @@
       <header class="brand">
         <svg class="brand-logo" viewBox="0 0 88 70" aria-hidden="true">
           <g>
-            <path class="waves" d="M32.5 48.9a16 16 0 0 1 23 0M22.4 39.2a30 30 0 0 1 43.2 0M12.4 29.4a44 44 0 0 1 63.2 0" />
-            <circle class="dot" cx="44" cy="60" r="6" />
+            <path class="waves" d="M32 15h24a9 9 0 0 1 9 9v22a9 9 0 0 1-9 9H32a9 9 0 0 1-9-9V24a9 9 0 0 1 9-9zM6 27h7M6 43h7M75 27h7M75 43h7" />
+            <circle class="dot" cx="44" cy="35" r="6.5" />
           </g>
         </svg>
         <div class="brand-text">
-          <h1>Learn <span>ESP32</span></h1>
+          <h1>Circuit<span>Deck</span></h1>
           <p><span data-i18n>Explore</span> <i>·</i> <span data-i18n>Build</span> <i>·</i> <span data-i18n>Connect</span> <i>·</i> <span data-i18n>Create</span></p>
         </div>
       </header>
@@ -290,10 +294,10 @@
 
       <!-- Footer (compact layout; the wide layout keeps these in the side nav) -->
       <footer class="app-foot">
-        <a class="credit credit-row" href="https://x.com/DilumSanjaya" target="_blank" rel="noopener noreferrer" title="Designed by x.com/DilumSanjaya" data-i18n-attr="title">
+        <a class="credit credit-row" href="https://x.com/DilumSanjaya" target="_blank" rel="noopener noreferrer" title="Based on Learn ESP32 by Dilum Sanjaya">
           <svg class="credit-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.4l-5.8-7.59-6.64 7.59H.47l8.6-9.83L0 1.15h7.6l5.24 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z" /></svg>
           <span class="credit-rule" aria-hidden="true"></span>
-          <span class="credit-text"><small data-i18n>Designed by</small><b>x.com/DilumSanjaya</b></span>
+          <span class="credit-text"><small>Based on Learn ESP32 by</small><b>Dilum Sanjaya</b></span>
         </a>
       </footer>
     </div>

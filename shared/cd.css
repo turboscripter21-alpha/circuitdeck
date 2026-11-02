@@ -1,0 +1,80 @@
+/* CircuitDeck shared chrome: track switcher, theme toggle and the dark theme.
+   Loaded by every page. The dark theme only redefines the colour variables of
+   the original stylesheet plus the handful of hard-coded colours, so the ESP32
+   track's layout and behaviour stay exactly as they were. */
+
+/* ---------- track switcher + theme toggle ---------- */
+.cd-chrome{display:flex;align-items:center;gap:10px;flex:none;align-self:center;position:relative;z-index:5;font-family:var(--cond,"Barlow Semi Condensed",system-ui,sans-serif)}
+.cd-tracks{display:flex;gap:2px;padding:4px;border:1.5px solid var(--line,#e5d8c5);background:var(--card,#fffbf6);border-radius:12px;box-shadow:var(--shadow)}
+.cd-tracks a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;color:var(--navy,#0f2239);text-decoration:none;font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;transition:background .15s,color .15s}
+.cd-tracks a:hover{background:var(--accent-soft,#fdecdd)}
+.cd-tracks a[aria-current=page]{background:linear-gradient(180deg,#fb7d33,#f0611a);color:#fff}
+.cd-tracks a:focus-visible,.cd-theme:focus-visible,.cd-menu:focus-visible{outline:2px solid var(--accent,#f86b1d);outline-offset:2px}
+.cd-theme,.cd-menu{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line,#e5d8c5);background:var(--card,#fffbf6);box-shadow:var(--shadow);color:var(--navy,#0f2239);cursor:pointer;padding:0}
+.cd-theme svg,.cd-menu svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cd-theme .moon{display:none}
+html[data-theme=dark] .cd-theme .sun{display:none}
+html[data-theme=dark] .cd-theme .moon{display:block}
+.cd-menu{display:none}
+html.compact .cd-chrome{margin-left:auto;gap:8px}
+html.compact .cd-tracks a{padding:6px 9px;font-size:13px}
+html.compact .cd-theme,html.compact .cd-menu{width:36px;height:36px;border-radius:10px}
+@media (max-width:720px){
+  .cd-menu{display:inline-grid}
+  .cd-tracks{display:none;position:absolute;right:0;top:calc(100% + 8px);flex-direction:column;min-width:170px;z-index:50}
+  .cd-chrome.is-open .cd-tracks{display:flex}
+  .cd-tracks a{padding:10px 12px;font-size:15px}
+}
+
+/* ---------- dark theme: variables ---------- */
+html[data-theme=dark]{
+  --bg:#121821;--bg-deep:#0e131a;--card:#1a222d;--card-soft:#1a222df2;--panel:#17202ab8;--code-bg:#131a23;
+  --line:#2a3441;--line-strong:#3a4656;--line-soft:#212a35;--navy:#e8edf4;--navy-2:#cfd7e2;--ink:#b8c0ca;
+  --muted:#99a2ad;--faint:#6e7783;--accent:#f8772e;--accent-deep:#ff8d4a;--accent-soft:#3a2517;--green:#35c19f;
+  --track:#2a3340;--kw:#82b2ff;--fn:#ff9b5e;--num:#92bcf3;--str:#80d18f;--gutter:#5a6370;
+  --shadow:0 12px 28px -18px #000000d9;color-scheme:dark;background:#121821;
+}
+html[data-theme=dark] body{background:#121821}
+/* hard-coded colours of the original stylesheet */
+html[data-theme=dark] .artboard{background:radial-gradient(120% 90% at 40% 45%,#1d2733b3,transparent 60%),var(--bg)}
+html[data-theme=dark] .loader{background:var(--bg)}
+html[data-theme=dark] .brand-text p,html[data-theme=dark] .clock{color:#98a0aa}
+html[data-theme=dark] .callout,html[data-theme=dark] .tip,html[data-theme=dark] .flyout,html[data-theme=dark] .inspector{background:#1c2430f5}
+html[data-theme=dark] .callout p,html[data-theme=dark] .tip span,html[data-theme=dark] .insp-desc,html[data-theme=dark] .fly-text small,html[data-theme=dark] .insp-note{color:#aab2bc}
+html[data-theme=dark] .tabs button{color:#9aa2ac}
+html[data-theme=dark] .tabs button.is-active,html[data-theme=dark] .tabs button[aria-selected=true]{color:var(--accent)}
+html[data-theme=dark] .lede,html[data-theme=dark] .features li,html[data-theme=dark] .pin-table,html[data-theme=dark] .steps li{color:#b8c0ca}
+html[data-theme=dark] .feature-icon,html[data-theme=dark] .steps li:before,html[data-theme=dark] .spec-grid div{background:#202a36}
+html[data-theme=dark] .lesson-title{color:#d9dfe7}
+html[data-theme=dark] .readout,html[data-theme=dark] .view-hint{background:#e8edf4;color:#121821}
+html[data-theme=dark] .leaders .dot-anchor{fill:#1a222d}
+html[data-theme=dark] .side-label{color:#a4acb6}
+html[data-theme=dark] .side-nav a:hover{background:#ffffff0d}
+html[data-theme=dark] :is(.side-nav li.is-on .side-label,.side-nav:not(:has(li.is-on)) li.is-active .side-label){color:#ff9a5c}
+html[data-theme=dark] .switch-track,html[data-theme=dark] .insp-switch .track{background:#334050}
+html[data-theme=dark] .info-card.is-expanded,html[data-theme=dark] .code-card.is-expanded{background:#161e28fa}
+html[data-theme=dark] .console{background:#111821}
+html[data-theme=dark] .console-lines{color:#c9d1db}
+html[data-theme=dark] .lesson-done{background:#3a4656}
+html[data-theme=dark] .seg button{color:#c0c7d0}
+html[data-theme=dark] .seg button.is-on{color:#121821}
+html[data-theme=dark] .insp-row label,html[data-theme=dark] .insp-label{color:#c0c7d0}
+html[data-theme=dark] .code .param{color:#ffa060}
+html[data-theme=dark] .code .str{color:#80d18f}
+html[data-theme=dark] .credit-text small{color:#a0978a}
+html[data-theme=dark] a.credit:hover,html[data-theme=dark] .credit:hover{background:#222c38}
+html[data-theme=dark] .fly-reset{color:#ff8f7a}
+html[data-theme=dark] .side-desert .sand{fill:#5b4a35}
+html[data-theme=dark] .side-desert .hill{fill:#a86235}
+html[data-theme=dark] .scenery .dots circle{fill:#2d3846}
+html[data-theme=dark] .scenery{opacity:.55}
+html[data-theme=dark].compact .stage,html[data-theme=dark] html.compact .stage{background:#1a222dcc}
+html[data-theme=dark].compact .sidebar{background:#151c25f7}
+/* the 3D stage: a soft "light table" so dark PCBs and the floor grid keep their contrast */
+html[data-theme=dark] .stage canvas{filter:none}
+html[data-theme=dark] .stage{--stage-tint:#1c2531}
+/* the schematic card keeps paper colours: its drawing uses fixed ink colours */
+html[data-theme=dark] .schematic-card{--card:#f6efe4;--card-soft:#f6efe4f2;--navy:#0f2239;--ink:#5b6168;--line:#d9cbb6;--line-strong:#c9b89f;--muted:#6e7277;color:#0f2239}
+html[data-theme=dark] .schematic-card .sch-head h2{color:#0f2239}
+html[data-theme=dark] .loader:before{opacity:.35}
+@media (max-width:480px){html.compact .brand-text p{display:none}}

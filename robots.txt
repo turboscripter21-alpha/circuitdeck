@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://learn-esp32.vercel.app/sitemap.xml
+Sitemap: https://circuitdeck.vercel.app/sitemap.xml

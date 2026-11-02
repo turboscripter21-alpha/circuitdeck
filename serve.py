@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local static server for the Learn ESP32 mirror.
+"""Local static server for CircuitDeck.
 The live site is a pure static Vite build on Vercel (no serverless functions / API).
 This only reproduces Vercel's static-hosting behaviour: serve files from this folder,
 '/' -> index.html, unknown paths -> the site's own 404.html with HTTP 404.
