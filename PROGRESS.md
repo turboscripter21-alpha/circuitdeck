@@ -71,3 +71,4 @@
 - 01:00 IST: sb-test PASS (12 templates, ERRORS 0); sound-test 4/4 errs []. Next smoke.
 - 01:08 IST: smoke all PASS, ERRORS 0. Next thumbs.
 - 01:14 IST: thumbs regenerated (pi5 29, sandbox 12). assets/ unchanged. Committing v2.
+- 01:16 IST: committed v2 as 9b1f9ba, pushed (b83e32f..9b1f9ba, no force); stash@{0} M8 WIP untouched. Deployed git archive of 9b1f9ba to prod (dpl_2btqyp9ekJ4jBY1jsHndf7hJTA6c, aliased circuitdeck.vercel.app). Live verified, 0 console errors: _compare/phase2/pi5model/v2-live-side-by-side.png, v2-live-pi5-desktop-light/-dark.png, v2-live-pi5-mobile-light.png, v2-live-esp32-desktop-light.png. Pi 5 v2 DONE. Next: M8 AI (stash@{0}), started separately by the user.
