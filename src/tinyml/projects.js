@@ -388,7 +388,7 @@ void loop() {
         strikes = mse > 0.02 ? strikes + 1 : 0;
         ctx.set('bz', { on: strikes >= 3 });
         ctx.readout('bz', strikes >= 3 ? 'ALARM' : 'quiet');
-        if (i % 3 === 0 || strikes === 3) { ctx.at('Serial.printf'); ctx.print(`anomaly score ${fmt(mse, 4)}${strikes >= 3 ? '  ALARM' : ''}`, strikes >= 3 ? 'cd-err' : undefined); }
+        if (i % 3 === 0 || strikes === 3) { ctx.at('Serial.printf'); ctx.print(`anomaly score ${fmt(mse, 4)}${strikes >= 3 ? '  ALARM' : ''}`); }
       }
     },
   },
