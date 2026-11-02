@@ -38,4 +38,8 @@
 - Also: full ESP32 regression 20/20 (tests/p2-suite.mjs), 29/29 Pi 5 projects, 12/12 sandbox templates + roundtrips + click-wiring
 - ESP32 bundle diff vs e495fc3: only the title suffix (Learn ESP32 -> CircuitDeck) and floorCredit off
 - Fix: Pi 5 ledes showed literal <code> tags
-## M6 — deploy — todo
+## M6 — deploy — done
+- GitHub repo renamed javascript21alpha -> turboscripter21-alpha/circuitdeck (public); origin updated; pushed fast-forward (no force)
+- New Vercel project `circuitdeck`, deployed from a `git archive HEAD` copy: dpl_D6HCyHMGfWLUUqenL6hcNqXtp1cY -> https://circuitdeck.vercel.app (also circuitdeck-brwal.vercel.app)
+- Unauthenticated 200 on /, /pi5/, /sandbox/, /gallery/; live headless smoke (ESP32, sandbox, gallery, themes, mobile) passed with 0 console errors (tests/results/smoke-live.json)
+- Alias javascript21alpha.vercel.app removed (now 404). The old javascript21alpha Vercel project still exists, with alias javascript21alpha-brwal.vercel.app

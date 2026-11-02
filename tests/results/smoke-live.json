@@ -1,0 +1,120 @@
+{
+ "base": "https://circuitdeck.vercel.app",
+ "errors": [],
+ "esp32": {
+  "lessons": {
+   "board": {
+    "title": "Meet the ESP32 · CircuitDeck",
+    "active": "Lesson 1: Meet the ESP32",
+    "serial": 111,
+    "progressBefore": "0/20",
+    "progressAfter": "1/20",
+    "pass": true
+   },
+   "blink": {
+    "title": "Flash two LEDs · CircuitDeck",
+    "active": "Lesson 2: Flash two LEDs",
+    "serial": 118,
+    "progressBefore": "1/20",
+    "progressAfter": "2/20",
+    "pass": true
+   },
+   "radar": {
+    "title": "Ultrasonic radar · CircuitDeck",
+    "active": "Lesson 19: Ultrasonic radar",
+    "serial": 89,
+    "progressBefore": "2/20",
+    "progressAfter": "3/20",
+    "pass": true
+   }
+  },
+  "progressStored": "[\"board\",\"blink\",\"radar\"]",
+  "progressAfterReload": "3/20",
+  "language": {
+   "from": "en",
+   "to": "es",
+   "picked": "es",
+   "available": 12,
+   "lessonsTitle": "Lecciones",
+   "back": "en"
+  },
+  "pass": true,
+  "ms": 105713
+ },
+ "errorCount": 0,
+ "sandbox": {
+  "pass": true,
+  "runLines": 2,
+  "shareUrlChars": 308,
+  "roundtripIdentical": true,
+  "ms": 15409
+ },
+ "gallery": {
+  "pass": true,
+  "all": 61,
+  "pi5": 29,
+  "pi5Advanced": 2,
+  "url": "https://circuitdeck.vercel.app/gallery/?track=pi5&level=Advanced",
+  "ms": 2264
+ },
+ "mobile_home": {
+  "overflowX": 0,
+  "credit": 1,
+  "tracks": 4,
+  "pass": true,
+  "ms": 9994
+ },
+ "theme": {},
+ "theme_home": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 19286
+ },
+ "theme_pi5": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 10607
+ },
+ "theme_sandbox": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 12107
+ },
+ "theme_gallery": {
+  "pass": true,
+  "light": [
+   "light",
+   "rgb(248, 241, 230)"
+  ],
+  "dark": [
+   "dark",
+   "rgb(18, 24, 33)"
+  ],
+  "afterReload": "dark",
+  "ms": 5909
+ }
+}
