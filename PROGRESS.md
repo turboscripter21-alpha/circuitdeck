@@ -122,3 +122,4 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - 03:25 IST Nov 3: resumed. `git stash pop` applied stash@{0} onto 241edf3 (only PROGRESS.md conflicted; chrome.js merged cleanly with the M9 m19 overlay). Stash entry kept until the first WIP commit lands.
 - 03:40 IST Nov 3: resumed from stash@{0} (conflict only in PROGRESS.md, kept both). sb-test 12/12 templates clean, 0 console errors; sandbox Explain + webcam probe OK.
 - 04:05 IST: Pi 5 main.js now track-configurable (CFG; /tinyml reuses it), webcam ML in 4 Pi projects, __cdAIContext, cd-progress event. QR probe with fake y4m decodes live, 0 errors.
+- 22:14 M8: TinyML track — ESP32-S3 CAM board variant (buildEsp32({s3:true}), default unchanged), parts mpu6050/inmp441/ov2640 (cat TinyML, hidden in sandbox), src/tinyml/projects.js (6 projects), /tinyml/ page + thumbs. Probe: all 6 run.

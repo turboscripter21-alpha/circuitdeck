@@ -689,3 +689,6 @@ with Hailo(MODEL) as hailo:
     },
   },
 ];
+
+// M8: shared with the TinyML track's camera project
+export { room, person, hud };

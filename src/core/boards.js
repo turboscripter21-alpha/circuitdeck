@@ -26,6 +26,10 @@ PI_HEADER.forEach((n, i) => { if (n && n.startsWith('GPIO')) PI_PIN_NUMBER[n] = 
 // ESP32 DevKit (30-pin "DOIT" layout). Left column top->bottom, right column top->bottom.
 export const ESP_LEFT = ['EN', 'GPIO36', 'GPIO39', 'GPIO34', 'GPIO35', 'GPIO32', 'GPIO33', 'GPIO25', 'GPIO26', 'GPIO27', 'GPIO14', 'GPIO12', 'GPIO13', 'GND', 'VIN'];
 export const ESP_RIGHT = ['GPIO23', 'GPIO22', 'GPIO1', 'GPIO3', 'GPIO21', 'GPIO19', 'GPIO18', 'GPIO5', 'GPIO17', 'GPIO16', 'GPIO4', 'GPIO2', 'GPIO15', 'GND', '3V3'];
+// M8 · ESP32-S3 CAM board (the TinyML track): 2 × 22 pins, as on the common
+// Freenove-style ESP32-S3 WROOM CAM boards, plus a 24-pin camera connector.
+export const S3_LEFT = ['3V3', '3V3', 'RST', 'GPIO4', 'GPIO5', 'GPIO6', 'GPIO7', 'GPIO15', 'GPIO16', 'GPIO17', 'GPIO18', 'GPIO8', 'GPIO3', 'GPIO46', 'GPIO9', 'GPIO10', 'GPIO11', 'GPIO12', 'GPIO13', 'GPIO14', '5V', 'GND'];
+export const S3_RIGHT = ['GND', 'GPIO43', 'GPIO44', 'GPIO1', 'GPIO2', 'GPIO42', 'GPIO41', 'GPIO40', 'GPIO39', 'GPIO38', 'GPIO37', 'GPIO36', 'GPIO35', 'GPIO0', 'GPIO45', 'GPIO48', 'GPIO47', 'GPIO21', 'GPIO20', 'GPIO19', 'GND', 'GND'];
 export const ESP_FLAGS = {
   inputOnly: [34, 35, 36, 39],
   strapping: [0, 2, 5, 12, 15],
@@ -84,36 +88,53 @@ export function buildPi5() {
 }
 
 // ---------------------------------------------------------------------------
-export function buildEsp32() {
+// opts.s3: the ESP32-S3 CAM board of the TinyML track. The default (no opts)
+// is the classic ESP32 DevKit the sandbox uses, unchanged.
+export function buildEsp32(opts = {}) {
+  const S3 = !!opts.s3;
   const g = new THREE.Group();
-  g.name = 'esp32';
-  const W = 5.15, D = 2.8, T = 0.16;
+  g.name = S3 ? 'esp32s3' : 'esp32';
+  const W = S3 ? 6.6 : 5.15, D = 2.8, T = 0.16;
   const parts = [];
   const add = (o, d) => { info(o, d); g.add(o); parts.push(o); return o; };
-  const pcb = slab(W, D, T, mat(0x1c1f24, { roughness: 0.7 }), 0.12);
-  info(pcb, { title: 'ESP32 DevKit', desc: 'A dual-core 240 MHz microcontroller board with Wi-Fi and Bluetooth, 3.3 V logic.', rows: [['Chip', 'ESP32-WROOM-32'], ['Logic', '3.3 V'], ['Power', '5 V over USB or VIN']] });
+  const pcb = slab(W, D, T, mat(S3 ? 0x15325e : 0x1c1f24, { roughness: 0.7 }), 0.12);
+  info(pcb, S3
+    ? { title: 'ESP32-S3 CAM board', desc: 'An ESP32-S3 board with 8 MB PSRAM and a camera connector. The S3’s vector instructions speed up the int8 maths of small neural networks.', rows: [['Chip', 'ESP32-S3-WROOM-1 (N16R8)'], ['Logic', '3.3 V'], ['Power', '5 V over USB-C']] }
+    : { title: 'ESP32 DevKit', desc: 'A dual-core 240 MHz microcontroller board with Wi-Fi and Bluetooth, 3.3 V logic.', rows: [['Chip', 'ESP32-WROOM-32'], ['Logic', '3.3 V'], ['Power', '5 V over USB or VIN']] });
   g.add(pcb); parts.push(pcb);
   const mod = new THREE.Group();
   mod.add(box(1.8, 0.1, 1.8, mat(0x1f4fa0), 0, 0, 0));
   mod.add(box(1.5, 0.22, 1.6, metal(0xc4c9cf), 0.12, 0.1, 0));
-  const lab = silk(['ESP32', 'WROOM-32'], 1.4, 0.8, { color: 'rgba(70,76,84,0.8)', size: 16 });
+  const lab = silk(S3 ? ['ESP32-S3', 'WROOM-1'] : ['ESP32', 'WROOM-32'], 1.4, 0.8, { color: 'rgba(70,76,84,0.8)', size: 16 });
   const modDecal = decal(1.3, 0.75, lab, 0.325);
   modDecal.position.set(0.12, 0.325, 0);
   mod.add(modDecal);
-  mod.position.set(-1.55, T, 0);
-  add(mod, { title: 'ESP32-WROOM-32 module', desc: 'Two Xtensa LX6 cores at 240 MHz, 520 KB SRAM, 4 MB flash, Wi-Fi and Bluetooth, under the shield.', rows: [['CPU', '2 × 240 MHz'], ['Flash', '4 MB']] });
+  mod.position.set(S3 ? -2.15 : -1.55, T, 0);
+  add(mod, S3
+    ? { title: 'ESP32-S3-WROOM-1 module', desc: 'Two Xtensa LX7 cores at 240 MHz with vector (SIMD) instructions, 512 KB SRAM, 16 MB flash and 8 MB PSRAM, Wi-Fi and Bluetooth LE.', rows: [['CPU', '2 × 240 MHz LX7'], ['PSRAM', '8 MB'], ['Flash', '16 MB']] }
+    : { title: 'ESP32-WROOM-32 module', desc: 'Two Xtensa LX6 cores at 240 MHz, 520 KB SRAM, 4 MB flash, Wi-Fi and Bluetooth, under the shield.', rows: [['CPU', '2 × 240 MHz'], ['Flash', '4 MB']] });
   const usb = box(0.75, 0.3, 0.6, metal(0xc4c9cf), W / 2 - 0.3, T, 0);
-  add(usb, { title: 'Micro-USB', desc: 'Power and programming through the USB-to-serial chip.', rows: [['Power', '5 V']] });
-  const btn = (x, z, t) => add(box(0.35, 0.18, 0.3, mat(0x2b2f36), x, T, z), { title: `${t} button`, desc: t === 'EN' ? 'Resets the chip.' : 'Hold while resetting to enter the bootloader (GPIO 0).', rows: [] });
-  btn(1.4, -0.8, 'EN'); btn(1.4, 0.8, 'BOOT');
+  add(usb, S3 ? { title: 'USB-C', desc: 'Power, programming and the serial monitor.', rows: [['Power', '5 V']] } : { title: 'Micro-USB', desc: 'Power and programming through the USB-to-serial chip.', rows: [['Power', '5 V']] });
+  const btn = (x, z, t) => add(box(0.35, 0.18, 0.3, mat(0x2b2f36), x, T, z), { title: `${t} button`, desc: t === 'EN' || t === 'RST' ? 'Resets the chip.' : 'Hold while resetting to enter the bootloader (GPIO 0).', rows: [] });
+  btn(S3 ? 2.3 : 1.4, -0.8, S3 ? 'RST' : 'EN'); btn(S3 ? 2.3 : 1.4, 0.8, 'BOOT');
+  let cam = null;
+  if (S3) {
+    // 24-pin camera FPC connector between the module and the USB end
+    const fpc = new THREE.Group();
+    fpc.add(box(0.5, 0.22, 1.5, mat(0xf0ece2), 0, 0, 0));
+    fpc.add(box(0.18, 0.06, 1.3, mat(0x2b2f36), -0.08, 0.22, 0));
+    fpc.position.set(0.6, T, 0);
+    add(fpc, { title: 'Camera connector (24-pin DVP)', desc: 'The OV2640 / OV5640 camera’s flat cable clips in here. The S3 reads frames into PSRAM.', rows: [['Interface', 'DVP, 8-bit parallel'], ['Cameras', 'OV2640, OV5640']] });
+    cam = new THREE.Vector3(0.6, T + 0.3, 0);
+  }
   const pitch = 0.254;
   const tips = {};
   const byPhys = [null];
-  const rows = [[ESP_LEFT, D / 2 - 0.15], [ESP_RIGHT, -D / 2 + 0.15]];
+  const rows = S3 ? [[S3_LEFT, D / 2 - 0.15], [S3_RIGHT, -D / 2 + 0.15]] : [[ESP_LEFT, D / 2 - 0.15], [ESP_RIGHT, -D / 2 + 0.15]];
   const pinMat = metal(COLORS.gold);
   for (const [names, z] of rows) {
     names.forEach((n, i) => {
-      const x = -W / 2 + 0.55 + i * pitch * 1.2;
+      const x = -W / 2 + (S3 ? 0.35 : 0.55) + i * pitch * (S3 ? 1.1 : 1.2);
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.35, 10), pinMat);
       p.position.set(x, T + 0.17, z); g.add(p);
       const key = n;
@@ -125,7 +146,7 @@ export function buildEsp32() {
   const used = {};
   return {
     group: g, parts,
-    pinPoint(name) { const l = tips[name]; if (!l) return null; used[name] = (used[name] ?? -1) + 1; return l[used[name] % l.length]; },
+    pinPoint(name) { if (name === 'CAM' && cam) return cam; const l = tips[name]; if (!l) return null; used[name] = (used[name] ?? -1) + 1; return l[used[name] % l.length]; },
     physPoint(phys) { return byPhys[phys] || null; },
     resetPins() { for (const k of Object.keys(used)) delete used[k]; },
     size: { w: W, d: D, h: 0.6 },

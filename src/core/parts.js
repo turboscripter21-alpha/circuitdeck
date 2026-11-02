@@ -620,6 +620,43 @@ export const PARTS = {
       return { group: g, pins: local, anchor: new THREE.Vector3(0, 1.0, 0), apply(s) { lm.emissiveIntensity = s.busy ? 1.4 : 0.1; } };
     },
   },
+  // M8 · TinyML track parts (cat 'TinyML' keeps them out of the sandbox library)
+  mpu6050: {
+    name: 'MPU-6050 accelerometer + gyro', cat: 'TinyML', icon: 'chip',
+    desc: 'A 3-axis accelerometer and 3-axis gyroscope on I2C (address 0x68). Good for gestures, motion and vibration.',
+    pins: [P('VCC', 'vcc', { range: [3, 5] }), P('GND', 'gnd'), P('SCL', 'scl', { level: 'vcc' }), P('SDA', 'sda', { level: 'vcc' }), P('INT', 'out', { level: 'vcc' })],
+    buy: 'MPU-6050 breakout (GY-521), 3–5 V, I2C',
+    build() {
+      const m = moduleBoard({ w: 2.1, d: 1.6, color: COLORS.pcbBlue, pins: ['VCC', 'GND', 'SCL', 'SDA', 'INT'], pinEdge: 'front' });
+      m.group.add(chip(0.4, 0.4, 0.08, null, 0x1d2025).translateY(0.16).translateZ(-0.25));
+      return { group: m.group, pins: m.pins, anchor: new THREE.Vector3(0, 1.0, 0), apply() {} };
+    },
+  },
+  inmp441: {
+    name: 'INMP441 I2S microphone', cat: 'TinyML', icon: 'chip',
+    desc: 'A digital MEMS microphone that streams audio over I2S — a clean 16 kHz signal for keyword spotting.',
+    pins: [P('VDD', 'vcc', { range: [1.8, 3.6] }), P('GND', 'gnd'), P('SD', 'out', { level: 'vcc' }), P('WS', 'in', { max: 3.6 }), P('SCK', 'in', { max: 3.6 }), P('L/R', 'in', { max: 3.6 })],
+    buy: 'INMP441 I2S MEMS microphone module (3.3 V)',
+    build() {
+      const m = moduleBoard({ w: 1.7, d: 1.7, color: COLORS.pcbBlue, pins: ['VDD', 'GND', 'SD', 'WS', 'SCK', 'L/R'], pinEdge: 'front' });
+      m.group.add(cyl(0.28, 0.28, 0.12, metal(0xc4c9cf), 0, 0.16, -0.25));
+      return { group: m.group, pins: m.pins, anchor: new THREE.Vector3(0, 1.0, 0), apply() {} };
+    },
+  },
+  ov2640: {
+    name: 'OV2640 camera (2 MP)', cat: 'TinyML', icon: 'camera',
+    desc: 'The 2-megapixel camera most ESP32-S3 CAM boards ship with. It clips into the board’s 24-pin connector; small greyscale frames feed the person-detection model.',
+    pins: [P('CAM', 'csi')],
+    buy: 'OV2640 camera with 24-pin FPC (usually included with the board)',
+    build() {
+      const g = new THREE.Group();
+      g.add(box(1.1, 0.3, 1.1, mat(0x1d2025), 0, 0, 0));
+      g.add(cyl(0.38, 0.38, 0.45, mat(0x15171a), 0, 0.3, 0));
+      const glass = new THREE.Mesh(new THREE.CircleGeometry(0.26, 24), new THREE.MeshStandardMaterial({ color: 0x223a66, roughness: 0.05, metalness: 0.6 })); glass.rotation.x = -Math.PI / 2; glass.position.set(0, 0.76, 0); g.add(glass);
+      g.add(box(0.5, 0.04, 1.4, mat(0xc9852b), 0, 0, 1.2));
+      return { group: g, pins: { CAM: new THREE.Vector3(0, 0.06, 1.9) }, anchor: new THREE.Vector3(0, 1.4, 0), apply() {} };
+    },
+  },
   levelshift: {
     name: 'Logic level shifter (4-ch, BSS138)', cat: 'Power', icon: 'chip',
     desc: 'Bidirectional 3.3 V ↔ 5 V translator for I2C and other slow signals. LV goes to 3.3 V, HV to 5 V, grounds together; LV1–LV2 face the Pi, HV1–HV2 face the 5 V device.',
