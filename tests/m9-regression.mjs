@@ -170,9 +170,10 @@ await t('M2', async () => {
   const pos = () => p.evaluate(() => { const s = window.__pi5.stage; return [s.camera.position.x, s.camera.position.y, s.camera.position.z, s.controls.target.x].map((v) => +v.toFixed(3)); });
   await p.locator('#board-canvas, .stage canvas').first().click({ position: { x: 300, y: 300 } }).catch(() => {});
   await p.waitForTimeout(300); const p0 = await pos();
-  await p.keyboard.down('KeyD'); await p.waitForTimeout(700); await p.keyboard.up('KeyD'); await p.waitForTimeout(300);
+  const hold = async (k, ref) => { await p.keyboard.down(k); await p.waitForFunction((r) => { const s = window.__pi5.stage; return Math.abs(s.camera.position.x - r[0]) + Math.abs(s.camera.position.y - r[1]) + Math.abs(s.camera.position.z - r[2]) > 0.05; }, ref, { timeout: 8000 }).catch(() => {}); await p.keyboard.up(k); await p.waitForTimeout(300); };
+  await hold('KeyD', p0);
   const p1 = await pos();
-  await p.keyboard.down('ArrowUp'); await p.waitForTimeout(500); await p.keyboard.up('ArrowUp'); await p.waitForTimeout(300);
+  await hold('ArrowUp', p1);
   const p2 = await pos();
   // left drag pans (target moves), it does not orbit
   const box = await p.locator('.stage canvas').first().boundingBox();
@@ -235,7 +236,8 @@ await t('m13', async () => {
     out[w] = await p.evaluate(() => { const l = document.querySelector('.lesson-list'); const first = l.querySelector('.lesson'); return { scrollLeft: Math.round(l.scrollLeft), cardLeft: Math.round(first.getBoundingClientRect().left), listLeft: Math.round(l.getBoundingClientRect().left) }; });
     if (w === 360) await p.screenshot({ path: O + 'm13-pi5-360.png' });
     // a later project is still scrolled into view
-    await p.evaluate(() => { location.hash = '#' + window.__pi5.PROJECTS[10].id; }); await p.waitForTimeout(2500);
+    await p.evaluate(() => { location.hash = '#' + window.__pi5.PROJECTS[10].id; });
+    await p.waitForFunction(() => { const l = document.querySelector('.lesson-list'); const a = l.querySelector('.lesson.is-active')?.getBoundingClientRect(), r = l.getBoundingClientRect(); return a && a.left >= r.left - 1 && a.right <= r.right + 1; }, null, { timeout: 15000 }).catch(() => {});
     out[w].later = await p.evaluate(() => { const l = document.querySelector('.lesson-list'); const a = l.querySelector('.lesson.is-active').getBoundingClientRect(), r = l.getBoundingClientRect(); return { visible: a.left >= r.left - 1 && a.right <= r.right + 1 }; });
     await c.close();
   }

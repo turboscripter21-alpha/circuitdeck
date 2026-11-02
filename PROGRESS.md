@@ -105,3 +105,6 @@ Source: /workspace/learn-esp32-local-bugs/BUGS.md (3 major, 20 minor). ESP32 bun
 | perf: addWire full rebuild | done | rebuild:'wires' |
 | perf: gallery fonts | done | font preloads |
 Tests: tests/m9-regression.mjs (24 checks), m9-contrast.mjs, m9-targets.mjs, m9-esp-hash.mjs. Bundle (assets/) and stash@{0} untouched.
+- 02:40 IST: M1 follow-up: untouched template/share loads no longer create "(autosave …)" entries (pristine snapshot). m18 follow-up: phone `.tag` min-height 26px (24 rendered as 23.9). Tests hardened for load (M2 key-hold waits for movement, m13 waits for scroll). Audits: contrast TOTAL 0 (4 pages × light/dark, + gallery 1280×2400), targets TOTAL 0 (390×844 and 1280×800), esp-hash PASS.
+- Suites: pi-all light 29/29, dark 29/29; sb-test ERRORS 0; smoke all true, ERRORS 0; sound-test errs []. (pw/p2-suite.mjs was the stale credit-checking copy; re-running tests/p2-suite.mjs.)
+- 03:20 IST: tests/p2-suite.mjs: ESP32 20/20 lessons, 16/16 page×theme×viewport, theme persist, switcher, ERRORS 0. tests/m9-regression.mjs: 24/24 pass, 0 console errors.

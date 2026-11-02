@@ -110,7 +110,7 @@ html[data-theme=dark] body .cd-btn.cd-danger{color:#ff7a66}
 .console-grip{height:30px;top:-15px}
 .console-grip:after{top:13px}
 .tag{min-height:30px}
-html.compact .tag{min-height:24px}
+html.compact .tag{min-height:26px}
 html.compact .console-close{width:28px;height:28px;margin:-3px}
 .sb-status a[data-act=checks]{display:inline-block;padding:9px 6px;margin:-9px -6px}
 .cd-btn{min-height:30px}
