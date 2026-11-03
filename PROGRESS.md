@@ -163,3 +163,10 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - Scene, placement, drag-to-move, selection, per-board wiring checks, edit()/undo/redo history, boards/parts/wires add-remove, rotate, copy/paste/duplicate, file tabs (add/rename/delete), language switch, generate-from-wiring.
 - Multi-file build (helper files first, `#include "x.h"` / `from x import` blanked, line numbers mapped back per file), Run/Stop with one Machine per board on a shared Hardware, LCD/OLED drawing, Inputs panel.
 - Next: inspector, info tabs, flyouts, shortcuts, save/load/share, boot.
+
+### M11 WIP — canvas main.js complete (inspector, tabs, flyouts, keys, boot)
+- Inspector (props, nudge, rotate, duplicate, remove), pin-to-pin wiring via onPick, wire delete.
+- Info tabs: Canvas (actions, share, shortcuts), Wiring list + add-wire, Checks + Explain with AI, APIs per language.
+- Flyouts: starters + My saves (IndexedDB), parts library with search, boards, settings, reference.
+- Keyboard: undo/redo, copy/paste/duplicate, delete, rotate, Esc, Ctrl+Enter run, Ctrl+S save.
+- Boot from share link / autosave / ESP32 starter; `__cdAIContext` and `__cv` test hooks.
