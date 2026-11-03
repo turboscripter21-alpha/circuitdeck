@@ -145,3 +145,4 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - 9. sb-test pass (ERRORS 0), smoke all checks true (ERRORS 0). Next: p2-suite all, pi-all light.
 - 10. p2-suite all: all checks true incl. mobile 390x844, ERRORS 0. Next: pi-all light.
 - 11. pi-all light: 29/29 PASS. Next: pi-all dark, push, deploy.
+- 12. pi-all dark: 29/29 PASS. Pushed b214790 (no force) and deployed it from a git archive: dpl_AvQkM8fw29VTjNUtB8Q5yeTHHNP4 → circuitdeck.vercel.app. Live checks: /sandbox/#train opens the panel (0 console errors, no 4xx; vendor/tfjs and firmware/ return 200). m10-train against the live site: motion 29/0, mobile 5/0, tinyml 2/0. Live screenshots in _compare/m10/live/. Test-only fix: shake() now cancels its own stop-timeout, because a stale 100 s timeout from an earlier shake was killing a later one on slow runs (live motion → LED check). tests/ is not deployed, so no redeploy was needed.

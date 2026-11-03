@@ -70,11 +70,11 @@ const GEN = () => {
     },
     // live phone motion matching a class, same noise as motion() (DeviceMotion units: m/s² and °/s)
     shake(cls, ms = 99999) {
-      clearInterval(this.timer); const sgn = cls ? 1 : -1; let t = 0;
+      clearInterval(this.timer); clearTimeout(this.stopper); const sgn = cls ? 1 : -1; let t = 0;
       this.timer = setInterval(() => { t++; window.dispatchEvent(new DeviceMotionEvent('devicemotion', { accelerationIncludingGravity: { x: (sgn * 0.5 + 0.15 * Math.sin(t / 3) + (rnd() - 0.5) * 0.1) * 9.81, y: (rnd() - 0.5) * 0.2 * 9.81, z: (0.8 + (rnd() - 0.5) * 0.1) * 9.81 }, rotationRate: { alpha: (rnd() - 0.5) * 0.1 * 250, beta: (rnd() - 0.5) * 0.1 * 250, gamma: (sgn * 0.3 + (rnd() - 0.5) * 0.1) * 250 }, interval: 16 })); }, 16);
-      setTimeout(() => clearInterval(this.timer), ms);
+      const timer = this.timer; this.stopper = setTimeout(() => clearInterval(timer), ms); // only stops this shake, never a later one
     },
-    stop() { clearInterval(this.timer); },
+    stop() { clearInterval(this.timer); clearTimeout(this.stopper); },
   };
 };
 async function seed(p, kind, n) {
