@@ -10,12 +10,14 @@
     { id: 'pi5', href: '/pi5/', label: 'Pi 5' },
     { id: 'tinyml', href: '/tinyml/', label: 'TinyML' },
     { id: 'sandbox', href: '/sandbox/', label: 'Sandbox' },
+    { id: 'canvas', href: '/canvas/', label: 'Canvas' },
     { id: 'gallery', href: '/gallery/', label: 'Gallery' },
   ];
   const current = () => {
     const p = location.pathname;
     if (p.startsWith('/pi5')) return 'pi5';
     if (p.startsWith('/sandbox')) return 'sandbox';
+    if (p.startsWith('/canvas')) return 'canvas';
     if (p.startsWith('/gallery')) return 'gallery';
     if (p.startsWith('/tinyml')) return 'tinyml';
     return 'esp32';
@@ -85,7 +87,7 @@
   }
   // sound on/off (pages with simulated parts); the audio itself lives in src/core/sound.js
   const SKEY = 'circuitdeck:sound';
-  const SOUND_PAGES = ['pi5', 'sandbox', 'tinyml'];
+  const SOUND_PAGES = ['pi5', 'sandbox', 'tinyml', 'canvas'];
   let snd;
   const getSound = () => { try { return localStorage.getItem(SKEY) !== '0'; } catch { return true; } };
   function setSound(on) {

@@ -445,7 +445,8 @@ function renderTab(name) {
       </div>
       ${shareUrl ? `<label class="sb-share"><span>Share link (copied)</span><input type="text" readonly value="${esc(shareUrl)}" data-act="sharebox"></label>` : ''}
       <ol class="steps sb-how"><li>Add parts from <b>Components</b> or start from a <b>template</b>.</li><li>Click a pin dot, then another pin, to run a wire. Click a wire to delete it.</li><li>Fix anything the <b>Checks</b> tab flags, then press <b>Run</b>.</li></ol>
-      <p class="cd-note">Saved in this browser only. Share links hold the whole circuit in the URL — nothing is uploaded.</p>`;
+      <p class="cd-note">Saved in this browser only. Share links hold the whole circuit in the URL — nothing is uploaded.</p>
+      <p class="cd-note sb-canvas-link">Want several boards, any pin to any pin and your own code? <a href="/canvas/">Open the Canvas</a>.</p>`;
   }
   if (name === 'pinout') {
     const ends = endpointsAll();

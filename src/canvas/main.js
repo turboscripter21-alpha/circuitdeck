@@ -1068,8 +1068,9 @@ function renderTab(name) {
         <button type="button" class="cd-btn cd-danger" data-act="clear">Clear</button>
       </div>
       ${shareUrl ? `<label class="sb-share"><span>Share link (copied)</span><input type="text" readonly value="${esc(shareUrl)}" data-act="sharebox"></label>` : ''}
-      <ol class="steps sb-how"><li>Add boards and parts from the sidebar — drag them anywhere, <span class="cv-kbd">]</span> rotates.</li><li>Click a pin dot, then any other pin, to run a wire.</li><li>Write code for each board in the editor (tabs = files), then press <b>Run</b>.</li></ol>
-      <p class="cd-note">Shortcuts: <span class="cv-kbd">Ctrl+Z</span> undo · <span class="cv-kbd">Ctrl+Shift+Z</span> redo · <span class="cv-kbd">Ctrl+C/V/D</span> copy / paste / duplicate · <span class="cv-kbd">Del</span> remove · <span class="cv-kbd">[ ]</span> rotate · <span class="cv-kbd">Ctrl+Enter</span> run · <span class="cv-kbd">Ctrl+S</span> save. Autosaves in this browser; share links hold everything in the URL — nothing is uploaded.</p>`;
+      <ol class="steps sb-how"><li>Add boards and parts from the sidebar — drag them anywhere, <kbd>]</kbd> rotates.</li><li>Click a pin dot, then any other pin, to run a wire.</li><li>Write code for each board in the editor (tabs = files), then press <b>Run</b>.</li></ol>
+      <h3 class="cd-h3">Shortcuts</h3><div class="cv-kbd"><kbd>Ctrl+Z</kbd><span>Undo</span><kbd>Ctrl+Shift+Z</kbd><span>Redo</span><kbd>Ctrl+C / V / D</kbd><span>Copy · paste · duplicate</span><kbd>Del</kbd><span>Remove the selection</span><kbd>[  ]</kbd><span>Rotate 90°</span><kbd>Esc</kbd><span>Cancel a wire / deselect</span><kbd>Ctrl+Enter</kbd><span>Run / stop</span><kbd>Ctrl+S</kbd><span>Save to My saves</span></div>
+      <p class="cd-note">Autosaves in this browser; share links hold everything in the URL — nothing is uploaded.</p>`;
   }
   if (name === 'pinout') {
     const ends = [...model.boards.flatMap((b) => pinsOf(b.type).map((p) => `${b.id}:${p.id}`)), ...model.parts.flatMap((p) => PARTS[p.type].pins.map((d) => `${p.id}.${d.n}`))];

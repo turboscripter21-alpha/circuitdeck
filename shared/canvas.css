@@ -77,3 +77,8 @@ html.compact .cv-editor.code { font-size: 16px; }
 #cd-panel{max-height:calc(100% - 150px);overflow:auto}
 .cv-in-name{font:600 12px var(--cond);letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-top:2px}
 .cd-press.is-on{background:var(--accent);border-color:var(--accent);color:#fff}
+.sb-how kbd, .cd-note kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; background: var(--code-bg); }
+html.compact .cv-errbar { flex-wrap: wrap; }
+html.compact .cv-errbar span { flex: 1 1 calc(100% - 30px); max-height: none; }
+html.compact .cv-errbar .cd-btn { margin-left: auto; }
+html.compact .cv-errbar .cd-btn + .cd-btn { margin-left: 0; }

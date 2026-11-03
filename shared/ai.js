@@ -14,9 +14,9 @@
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const API = '/api/ai';
   const K = { runs: 'circuitdeck:runs', seen: 'circuitdeck:seen', recOff: 'circuitdeck:rec-hidden' };
-  const DONE = { esp32: 'learn-esp32:done', pi5: 'circuitdeck:pi5:done', tinyml: 'circuitdeck:tinyml:done', sandbox: 'circuitdeck:sandbox:done' };
-  const TRACK_NAME = { esp32: 'ESP32', pi5: 'Pi 5', sandbox: 'Sandbox', tinyml: 'TinyML' };
-  const page = (() => { const p = location.pathname; if (p.startsWith('/pi5')) return 'pi5'; if (p.startsWith('/sandbox')) return 'sandbox'; if (p.startsWith('/gallery')) return 'gallery'; if (p.startsWith('/tinyml')) return 'tinyml'; return 'esp32'; })();
+  const DONE = { esp32: 'learn-esp32:done', pi5: 'circuitdeck:pi5:done', tinyml: 'circuitdeck:tinyml:done', sandbox: 'circuitdeck:sandbox:done', canvas: 'circuitdeck:canvas:done' };
+  const TRACK_NAME = { esp32: 'ESP32', pi5: 'Pi 5', sandbox: 'Sandbox', tinyml: 'TinyML', canvas: 'Canvas' };
+  const page = (() => { const p = location.pathname; if (p.startsWith('/pi5')) return 'pi5'; if (p.startsWith('/sandbox')) return 'sandbox'; if (p.startsWith('/canvas')) return 'canvas'; if (p.startsWith('/gallery')) return 'gallery'; if (p.startsWith('/tinyml')) return 'tinyml'; return 'esp32'; })();
   const LESSON_PAGE = page !== 'gallery';
   const ICON = {
     spark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.7 4.6 4.6 1.7-4.6 1.7L12 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>',

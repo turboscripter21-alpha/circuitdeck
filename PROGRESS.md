@@ -170,3 +170,8 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - Flyouts: starters + My saves (IndexedDB), parts library with search, boards, settings, reference.
 - Keyboard: undo/redo, copy/paste/duplicate, delete, rotate, Esc, Ctrl+Enter run, Ctrl+S save.
 - Boot from share link / autosave / ESP32 starter; `__cdAIContext` and `__cv` test hooks.
+
+### M11 WIP — registration, links, first browser pass
+- Canvas added to the track switcher (chrome.js), AI tutor (ai.js), gallery tracks and the sandbox Canvas tab.
+- Starters run in the browser (ESP32 C++/MicroPython, S3, Pi 5, multi-board) with 0 console errors; compile errors show file + line.
+- Fixed: sidebar overlap (dropped unused Train item), shortcut list layout, error bar wrapping on phones.
