@@ -180,3 +180,6 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - Fixed: share links hung page boot (Blob-stream pipe stalls while the page is loading) — `pipe()` now writes and reads concurrently.
 - Fixed: `importJSON` is now undoable (pushes history), same as file import.
 - Suite covers ESP32/Pi blink, button, buzzer, servo, LCD/OLED/relay, MicroPython pot ADC, error line numbers (C++/MicroPython/Python), generate-from-wiring, keys/undo/redo/flyouts/tabs, share/autosave/My saves/JSON roundtrips, broken link, multi-board, mobile light+dark, desktop dark, 0 console errors.
+
+### M11 WIP — real starter thumbnails
+- `_tools/cv-thumbs.mjs` renders /canvas/thumbs/<starter>.png from the live starters (same framing as the sandbox thumbs).
