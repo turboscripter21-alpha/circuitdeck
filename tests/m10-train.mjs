@@ -252,6 +252,9 @@ async function mic() {
   await p.click('.tr-class >> nth=0 >> [data-record]');
   await until(p, () => window.__train.state.samples.length === 1, null, 20000);
   ok(await p.evaluate(() => window.__train.state.samples[0].data.length) === 1280, 'Record 1 s → a 40×32 spectrogram sample');
+  // the fake wav is a gated 440 Hz tone, not a clap: drop it so the synthetic 2-class set is clean
+  await p.click('.tr-thumb >> nth=0');
+  await until(p, () => window.__train.state.samples.length === 0, null, 10000);
   await seed(p, 'mic', 12);
   await tab(p, 'train');
   const r = await train(p, 30);
