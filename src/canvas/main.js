@@ -1146,7 +1146,9 @@ async function share() {
 function importJSON(text) {
   let raw;
   try { raw = JSON.parse(text); } catch { throw new Error('Not valid JSON.'); }
+  const before = model ? M.serialize(model) : null;
   load(raw, { fresh: false });
+  if (before) { hist.push({ m: before, files: true }); redoStack = []; }
   notice = `Imported “${model.name}”. Ctrl+Z goes back to what you had.`;
   info.show('overview');
 }
@@ -1156,9 +1158,8 @@ fileIn.addEventListener('change', async () => {
   if (!f) return;
   try {
     if (f.size > 400000) throw new Error('File is too big for a canvas.');
-    const before = M.serialize(model);
     importJSON(await f.text());
-    hist.push({ m: before, files: true }); refreshTab();
+    refreshTab();
   } catch (err) { notice = `Import failed: ${err.message}`; info.show('overview'); }
 });
 function shareError(err) {

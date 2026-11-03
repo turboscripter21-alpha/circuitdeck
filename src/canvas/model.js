@@ -165,7 +165,16 @@ export const clone = (m) => JSON.parse(serialize(m));
 // ---------------------------------------------------------------- share links (#c= deflate-raw, #j= plain)
 const b64u = (bytes) => { let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = (s) => { const t = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)); return Uint8Array.from(t, (ch) => ch.charCodeAt(0)); };
-const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+// Write and read concurrently (a Blob-stream pipe can stall while the page is still loading).
+async function pipe(bytes, stream) {
+  const w = stream.writable.getWriter();
+  const done = w.write(bytes).then(() => w.close());
+  const r = stream.readable.getReader(); const chunks = []; let n = 0;
+  for (;;) { const { value, done: end } = await r.read(); if (end) break; chunks.push(value); n += value.length; }
+  await done;
+  const out = new Uint8Array(n); let o = 0; for (const c of chunks) { out.set(c, o); o += c.length; }
+  return out;
+}
 export async function encodeShare(m) {
   const bytes = new TextEncoder().encode(serialize(m));
   if (typeof CompressionStream === 'function') return `c=${b64u(await pipe(bytes, new CompressionStream('deflate-raw')))}`;

@@ -175,3 +175,8 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - Canvas added to the track switcher (chrome.js), AI tutor (ai.js), gallery tracks and the sandbox Canvas tab.
 - Starters run in the browser (ESP32 C++/MicroPython, S3, Pi 5, multi-board) with 0 console errors; compile errors show file + line.
 - Fixed: sidebar overlap (dropped unused Train item), shortcut list layout, error bar wrapping on phones.
+
+### M11 WIP — Playwright suite green (tests/m11-canvas.mjs, 51/51)
+- Fixed: share links hung page boot (Blob-stream pipe stalls while the page is loading) — `pipe()` now writes and reads concurrently.
+- Fixed: `importJSON` is now undoable (pushes history), same as file import.
+- Suite covers ESP32/Pi blink, button, buzzer, servo, LCD/OLED/relay, MicroPython pot ADC, error line numbers (C++/MicroPython/Python), generate-from-wiring, keys/undo/redo/flyouts/tabs, share/autosave/My saves/JSON roundtrips, broken link, multi-board, mobile light+dark, desktop dark, 0 console errors.
