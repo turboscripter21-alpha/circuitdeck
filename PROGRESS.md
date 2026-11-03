@@ -144,3 +144,4 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - 8. Regressions: m8-ai 10/10 (0 errors), m9-regression 24/24 (m19 rerun alone after the batch hit my 380 s timeout), sound-test ok. Next: sb-test, smoke, p2-suite all, pi-all light/dark.
 - 9. sb-test pass (ERRORS 0), smoke all checks true (ERRORS 0). Next: p2-suite all, pi-all light.
 - 10. p2-suite all: all checks true incl. mobile 390x844, ERRORS 0. Next: pi-all light.
+- 11. pi-all light: 29/29 PASS. Next: pi-all dark, push, deploy.
