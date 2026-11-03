@@ -9,10 +9,13 @@ export const BOARDS = {
   esp32: { name: 'ESP32 DevKit', short: 'ESP32', logic: 3.3 },
   pi5: { name: 'Raspberry Pi 5', short: 'Pi 5', logic: 3.3 },
 };
+// M11 · boards the canvas also offers (not in the sandbox's board switch)
+export const BOARDS_ALL = { ...BOARDS, esp32s3: { name: 'ESP32-S3 board', short: 'ESP32-S3', logic: 3.3 } };
 // The hardware buses' default pins on each board.
 export const BUS = {
   pi5: { sda: ['GPIO2'], scl: ['GPIO3'], mosi: ['GPIO10'], miso: ['GPIO9'], sck: ['GPIO11'], cs: ['GPIO8', 'GPIO7'] },
   esp32: { sda: ['GPIO21'], scl: ['GPIO22'], mosi: ['GPIO23'], miso: ['GPIO19'], sck: ['GPIO18'], cs: ['GPIO5', 'GPIO15'] },
+  esp32s3: { sda: ['GPIO8'], scl: ['GPIO9'], mosi: ['GPIO11'], miso: ['GPIO13'], sck: ['GPIO12'], cs: ['GPIO10'] },
 };
 const PORT_FOR = { csi: ['CAM0', 'CAM1'], pcie: ['PCIE'], fan: ['FAN'] };
 const LED_VF = { red: 2.0, yellow: 2.1, orange: 2.1, green: 2.2, blue: 3.0, white: 3.0 };
@@ -108,7 +111,7 @@ export function analyse(c) {
   const I = (ref) => { const n = net(ref); return n ? info.get(n) : null; };
   const label = (ref) => refLabel(c, ref);
   const board = c.board;
-  const B = BOARDS[board];
+  const B = BOARDS_ALL[board];
 
   // A ground net is one tied to the board's GND or a supply's minus terminal.
   for (const [n, d] of info) d.realGnd = d.board.some((p) => p.kind === 'gnd') || d.pins.some((p) => p.def.role === 'gnd' && p.part.type in { battery: 1, psu12: 1 });

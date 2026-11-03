@@ -42,7 +42,7 @@ export const ESP_FLAGS = {
 export function boardPins(kind) {
   const out = [];
   const seen = new Set();
-  const names = kind === 'pi5' ? PI_HEADER.slice(1).map((n, i) => ({ n, phys: i + 1 })) : [...ESP_LEFT, ...ESP_RIGHT].map((n, i) => ({ n, phys: i + 1 }));
+  const names = kind === 'pi5' ? PI_HEADER.slice(1).map((n, i) => ({ n, phys: i + 1 })) : (kind === 'esp32s3' ? [...S3_LEFT, ...S3_RIGHT] : [...ESP_LEFT, ...ESP_RIGHT]).map((n, i) => ({ n, phys: i + 1 }));
   for (const { n, phys } of names) {
     const id = n === 'GND' || n === '3V3' || n === '5V' ? `${n}@${phys}` : n;
     if (seen.has(id)) continue; seen.add(id);
@@ -50,7 +50,7 @@ export function boardPins(kind) {
     if (n === 'GND') { k = 'gnd'; volts = 0; }
     else if (n === '3V3') { k = 'power'; volts = 3.3; }
     else if (n === '5V' || n === 'VIN') { k = 'power'; volts = 5; }
-    else if (n === 'EN') { k = 'special'; }
+    else if (n === 'EN' || n === 'RST') { k = 'special'; }
     out.push({ id, name: n, phys, kind: k, volts });
   }
   if (kind === 'pi5') {

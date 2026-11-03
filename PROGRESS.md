@@ -146,3 +146,7 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - 10. p2-suite all: all checks true incl. mobile 390x844, ERRORS 0. Next: pi-all light.
 - 11. pi-all light: 29/29 PASS. Next: pi-all dark, push, deploy.
 - 12. pi-all dark: 29/29 PASS. Pushed b214790 (no force) and deployed it from a git archive: dpl_AvQkM8fw29VTjNUtB8Q5yeTHHNP4 → circuitdeck.vercel.app. Live checks: /sandbox/#train opens the panel (0 console errors, no 4xx; vendor/tfjs and firmware/ return 200). m10-train against the live site: motion 29/0, mobile 5/0, tinyml 2/0. Live screenshots in _compare/m10/live/. Test-only fix: shake() now cancels its own stop-timeout, because a stale 100 s timeout from an earlier shake was killing a later one on slow runs (live motion → LED check). tests/ is not deployed, so no redeploy was needed.
+
+## M11 Canvas mode (in progress)
+- WIP 1: canvas runtime stack — `src/canvas/cpp.js` (Arduino C++ → JS generator compiler, line-numbered errors), `src/canvas/hw.js` (net solver: wires, power, resistors, buttons, relays → part states), `src/canvas/runtime.js` (cooperative scheduler, virtual time, interrupts, pin checks), `src/canvas/arduino.js` (Arduino core + Servo/LCD/SSD1306/DHT/BME280/NeoPixel/LedControl/Stepper/Keypad). ESP32-S3 pin map added to boards.js / circuit.js.
+- Verified in node: blink, button+interrupt, servo, tone, LCD/OLED/DHT/ring/matrix/keypad/stepper/HC-SR04, compile + runtime errors with line numbers; all 6 sandbox ESP32 templates compile.
