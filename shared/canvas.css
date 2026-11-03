@@ -73,3 +73,7 @@ html.compact .cv-code .console.is-open { display: flex; }
 html.compact .cv-code .console-lines { max-height: 150px; }
 html.compact .cv-editor textarea { font-size: 16px; }
 html.compact .cv-editor.code { font-size: 16px; }
+/* inputs panel */
+#cd-panel{max-height:calc(100% - 150px);overflow:auto}
+.cv-in-name{font:600 12px var(--cond);letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-top:2px}
+.cd-press.is-on{background:var(--accent);border-color:var(--accent);color:#fff}

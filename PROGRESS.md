@@ -158,3 +158,8 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - `shared/canvas.css`: editor overlay (textarea over highlighted copy, gutter, error line), tabs, dark theme, compact layout.
 - `src/canvas/editor.js`: file tabs, board/language selects, Tab/Shift+Tab indent, auto-indent, error banner with Go to line / Fix with AI, streaming console.
 - Next: `src/canvas/main.js` (scene, drag/rotate, wiring, run, undo/redo, save/share).
+
+### M11 step 5 — canvas main.js, part 1 (WIP, not wired up yet)
+- Scene, placement, drag-to-move, selection, per-board wiring checks, edit()/undo/redo history, boards/parts/wires add-remove, rotate, copy/paste/duplicate, file tabs (add/rename/delete), language switch, generate-from-wiring.
+- Multi-file build (helper files first, `#include "x.h"` / `from x import` blanked, line numbers mapped back per file), Run/Stop with one Machine per board on a shared Hardware, LCD/OLED drawing, Inputs panel.
+- Next: inspector, info tabs, flyouts, shortcuts, save/load/share, boot.
