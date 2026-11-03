@@ -1,0 +1,75 @@
+/* CircuitDeck · Canvas mode (M11): free-form boards + parts + your own code */
+html[data-page=canvas] .info-card { height: 300px; }
+html[data-page=canvas] .code-card { top: 422px; height: 361px; --console-h: 124px; }
+html[data-page=canvas] .code-card.is-expanded { top: 112px; height: 671px; }
+.cv-code header { height: 50px; }
+.cv-code .code-actions { display: flex; gap: 6px; align-items: center; }
+
+/* file tabs row */
+.cv-files { display: flex; align-items: center; gap: 6px; padding: 0 2px 7px; min-height: 34px; overflow-x: auto; scrollbar-width: none; flex: none; }
+.cv-files select { font: 600 13px var(--sans); color: var(--navy); background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; height: 28px; padding: 0 6px; max-width: 150px; }
+.cv-tabs { display: flex; gap: 4px; align-items: center; }
+.cv-tab { font: 500 13px var(--mono); color: var(--navy); background: transparent; border: 1.5px solid var(--line); border-radius: 8px; height: 28px; padding: 0 9px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+.cv-tab.is-active { background: var(--code-bg); border-color: var(--accent); }
+.cv-tab .cv-x { opacity: .55; font-size: 15px; line-height: 1; padding: 0 2px; }
+.cv-tab .cv-x:hover { opacity: 1; color: #cf4532; }
+.cv-add { font: 600 16px var(--sans); padding: 0 8px; }
+
+/* editor: textarea over a highlighted copy, gutter on the left */
+.cv-editor.code { height: 100%; padding: 0; overflow: hidden; font-size: 14px; line-height: 20px; }
+.cv-editor textarea, .cv-editor .cv-hl { font: inherit; line-height: 20px; tab-size: 4; letter-spacing: 0; white-space: pre; margin: 0; }
+.cv-editor textarea { position: absolute; inset: 0; width: 100%; height: 100%; box-sizing: border-box; padding: 8px 12px 40px 52px; border: 0; outline: none; resize: none; background: transparent; color: transparent; caret-color: var(--navy); overflow: auto; z-index: 2; font-variant-ligatures: none; }
+.cv-editor textarea::selection { background: rgba(61, 111, 196, .28); color: transparent; }
+.cv-editor textarea:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); border-radius: 12px; }
+.cv-scroll { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.cv-editor .cv-hl { position: absolute; left: 0; top: 0; padding: 8px 12px 40px 52px; min-width: max-content; background: none; border: 0; }
+.cv-hl .ln { display: none; }
+.cv-hl .line { display: block; min-height: 20px; }
+.cv-gutter { position: absolute; left: 0; top: 0; width: 41px; padding-top: 8px; text-align: right; color: var(--gutter); font-size: 12px; pointer-events: none; z-index: 1; }
+.cv-gutter span { display: block; height: 20px; padding-right: 8px; }
+.cv-gutter span.is-err { color: #fff; background: #cf4532; border-radius: 0 6px 6px 0; }
+.cv-errline { position: absolute; left: 0; right: 0; height: 20px; background: rgba(207, 69, 50, .13); box-shadow: inset 3px 0 0 #cf4532; pointer-events: none; }
+.cv-errbar { display: flex; align-items: center; gap: 8px; margin: 0 0 7px; padding: 6px 8px 6px 10px; border-radius: 10px; background: #fde8e2; color: #7a2316; font-size: 13px; line-height: 17px; flex: none; }
+.cv-errbar[hidden] { display: none; }
+.cv-errbar svg { width: 18px; height: 18px; flex: none; }
+.cv-errbar span { flex: 1; min-width: 0; overflow-wrap: anywhere; max-height: 52px; overflow: auto; }
+.cv-errbar .cd-btn { flex: none; height: 28px; padding: 0 9px; font-size: 12.5px; }
+.cv-con-open .code-wrap { padding-bottom: var(--console-h); }
+.cv-code .console { z-index: 3; }
+.cv-serial { display: flex; gap: 6px; padding: 4px 8px 6px; border-top: 1px solid var(--line-soft); }
+.cv-serial input { flex: 1; min-width: 0; font: 13px var(--mono); border: 1.5px solid var(--line); border-radius: 7px; padding: 3px 7px; background: var(--panel); color: var(--navy); }
+.cv-serial .cd-btn { height: 26px; padding: 0 10px; font-size: 12.5px; }
+.console-lines .cv-b1 { color: #2f6fd0; } .console-lines .cv-b2 { color: #b0275a; } .console-lines .cv-b3 { color: #1f8a5b; } .console-lines .cv-b4 { color: #8f45b8; }
+
+/* info card bits */
+.cv-boards { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.cv-chip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 13px; background: var(--panel); }
+.cv-chip.is-cur { border-color: var(--accent); }
+.cv-chip button { border: 0; background: none; color: inherit; cursor: pointer; font: inherit; padding: 2px 4px; }
+.cv-apis { font-size: 13.5px; line-height: 19px; }
+.cv-apis code { font-family: var(--mono); font-size: 12.5px; }
+.cv-apis h3 { margin: 12px 0 4px; font-size: 14px; }
+.cv-kbd { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; margin: 8px 0; }
+.cv-kbd kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; background: var(--code-bg); white-space: nowrap; }
+.cv-addb { display: grid; gap: 8px; }
+.cv-addb .cv-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.cv-addb b { min-width: 120px; }
+
+/* dark theme */
+[data-theme=dark] .cv-editor textarea { caret-color: #e9eef5; }
+[data-theme=dark] .cv-errbar { background: #3a1d19; color: #ffc2b6; }
+[data-theme=dark] .cv-tab, [data-theme=dark] .cv-files select, [data-theme=dark] .cv-serial input { color: #e3e8ef; }
+[data-theme=dark] .cv-files select, [data-theme=dark] .cv-serial input { background: #1b2430; }
+[data-theme=dark] .console-lines .cv-b1 { color: #79a8ff; } [data-theme=dark] .console-lines .cv-b2 { color: #ff8db4; } [data-theme=dark] .console-lines .cv-b3 { color: #6fdaa8; } [data-theme=dark] .console-lines .cv-b4 { color: #c9a0ff; }
+
+/* phones / compact layout */
+html.compact[data-page=canvas] .info-card { height: auto; }
+html.compact[data-page=canvas] .code-card { height: auto; top: auto; }
+html.compact .cv-editor.code { height: 320px; max-height: none; }
+html.compact .cv-code .code-wrap { min-height: 320px; }
+html.compact .cv-con-open .code-wrap { padding-bottom: 0; }
+html.compact .cv-code .console { position: relative; transform: none; display: none; height: auto; max-height: 220px; }
+html.compact .cv-code .console.is-open { display: flex; }
+html.compact .cv-code .console-lines { max-height: 150px; }
+html.compact .cv-editor textarea { font-size: 16px; }
+html.compact .cv-editor.code { font-size: 16px; }

@@ -152,3 +152,9 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - Verified in node: blink, button+interrupt, servo, tone, LCD/OLED/DHT/ring/matrix/keypad/stepper/HC-SR04, compile + runtime errors with line numbers; all 6 sandbox ESP32 templates compile.
 - M11 step 2: `src/canvas/py.js` — Python interpreter (lexer/parser/generator-based evaluator) with friendly CPython-style errors + line numbers; modules: time/utime, math, random, sys, gc, signal.pause; Pi 5: gpiozero (LED, PWMLED, Buzzer, TonalBuzzer/Tone, Servo, AngularServo, Motor, RGBLED, Button, MotionSensor, DigitalInputDevice, DistanceSensor, MCP3008, CPUTemperature, LEDBoard, TrafficLights), RPi.GPIO (setup/output/input/PWM/events), RPLCD.i2c; ESP32 MicroPython: machine (Pin+irq, PWM, ADC, I2C.scan, Timer, time_pulse_us, reset), dht, neopixel, ssd1306, i2c_lcd. Limitation: int/float share JS numbers (2.0 prints as 2); no classes/with.
 - M11 step 3: `src/canvas/model.js` (canvas document: boards/parts/wires/files, starters blank/ESP32/ESP32 MicroPython/ESP32-S3/Pi 5/multi-board, validation + limits, JSON export/import, deflate share links, localStorage autosave + IndexedDB named saves) and `src/canvas/gen.js` ("Generate starter code from my wiring": traces nets through resistors → Arduino C++ / MicroPython / gpiozero). Generated code for 10 part types runs clean in node on all three languages.
+
+### M11 step 4 — canvas page shell + editor (WIP)
+- `canvas/index.html` (from the sandbox layout: Starters/Boards/Components nav, code card with file tabs, error banner, editor, serial monitor + input).
+- `shared/canvas.css`: editor overlay (textarea over highlighted copy, gutter, error line), tabs, dark theme, compact layout.
+- `src/canvas/editor.js`: file tabs, board/language selects, Tab/Shift+Tab indent, auto-indent, error banner with Go to line / Fix with AI, streaming console.
+- Next: `src/canvas/main.js` (scene, drag/rotate, wiring, run, undo/redo, save/share).
