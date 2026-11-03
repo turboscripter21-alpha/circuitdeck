@@ -112,8 +112,9 @@ export function motionSource() {
       if (on) return;
       // iOS 13+: permission must be requested from a click
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        const p = await DeviceMotionEvent.requestPermission();
-        if (p !== 'granted') throw new Error('Motion permission was denied.');
+        const p = await DeviceMotionEvent.requestPermission().catch(() => 'denied');
+        // phones/tablets need it; a desktop without sensors falls back to the pointer stand-in
+        if (p !== 'granted' && navigator.maxTouchPoints > 0) throw new Error('Motion permission was denied. Allow motion access for this site, then try again.');
       }
       addEventListener('devicemotion', onMotion);
       timer = setInterval(tick, 1000 / MOTION.hz); on = true;
