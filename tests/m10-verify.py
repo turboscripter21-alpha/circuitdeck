@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory() as d:
     pz.extractall(d); root = os.path.join(d, "circuitdeck_ml_pi5")
     spec = importlib.util.spec_from_file_location("cdmodel", os.path.join(root, "cdmodel.py")); cm = importlib.util.module_from_spec(spec); spec.loader.exec_module(cm)
     m = cm.Model(os.path.join(root, "model.json"))
-    labels = open(os.path.join(root, "labels.txt")).read().split()
+    labels = [ln for ln in open(os.path.join(root, "labels.txt")).read().splitlines() if ln]
     tf = np.array(cases["probs"]); py = np.array([m.predict(x) for x in cases["inputs"]])
     err = float(np.abs(tf - py).max())
     say(err < 1e-4 and labels == cases["classes"], f"Pi 5 numpy runtime == TF.js (max |Δp| {err:.2e})")

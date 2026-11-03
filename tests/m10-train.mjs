@@ -42,7 +42,9 @@ const throttle3d = (p, on) => p.evaluate((on) => {
   const c = window.__sb.stage.composer; c.__render ||= c.render.bind(c); let n = 0;
   c.render = on ? (...a) => { if (n++ % 12 === 0) c.__render(...a); } : c.__render;
 }, on);
-const until = (p, fn, arg, timeout = 120000) => p.waitForFunction(fn, arg, { timeout, polling: 250 }).catch((e) => { throw new Error(`timed out (${timeout} ms) waiting for ${String(fn).slice(0, 140)}`); });
+const until = (p, fn, arg, timeout = 120000) => p.waitForFunction(fn, arg, { timeout, polling: 250 }).catch(async () => {
+  const d = await p.evaluate(() => { const t = window.__train?.state; return t && JSON.stringify({ tab: t.tab, live: t.src?.live, ev: t.src?.events, ring: t.src?.ring?.length, testing: t.testing, probs: t.probs, last: window.__train.lastAction, n: t.samples.length, training: t.training, notice: t.notice, err: t.srcErr }); }).catch(() => '?');
+  throw new Error(`timed out (${timeout} ms) waiting for ${String(fn).slice(0, 140)} | state ${d} | errors ${p.errors.join(' | ')}`); });
 const shot = async (p, name) => { if (!SHOTS) return; await throttle3d(p, false); await p.waitForTimeout(1500); await p.screenshot({ path: `${SHOTS}/${name}.png` }); await throttle3d(p, true); };
 
 // synthetic data, generated in the page (same normalisation as the sensors)
@@ -66,10 +68,10 @@ const GEN = () => {
       for (let i = 0; i < 4; i++) { g.fillStyle = `hsla(${rnd() * 360},50%,${40 + rnd() * 30}%,.5)`; g.beginPath(); g.arc(rnd() * 224, rnd() * 224, 15 + rnd() * 30, 0, 7); g.fill(); }
       return c;
     },
-    // live phone motion matching a class (DeviceMotion units: m/s² and °/s)
+    // live phone motion matching a class, same noise as motion() (DeviceMotion units: m/s² and °/s)
     shake(cls, ms = 99999) {
       clearInterval(this.timer); const sgn = cls ? 1 : -1; let t = 0;
-      this.timer = setInterval(() => { t++; window.dispatchEvent(new DeviceMotionEvent('devicemotion', { accelerationIncludingGravity: { x: (sgn * 0.5 + 0.15 * Math.sin(t / 3)) * 9.81, y: 0, z: 0.8 * 9.81 }, rotationRate: { alpha: 0, beta: 0, gamma: sgn * 0.3 * 250 }, interval: 16 })); }, 16);
+      this.timer = setInterval(() => { t++; window.dispatchEvent(new DeviceMotionEvent('devicemotion', { accelerationIncludingGravity: { x: (sgn * 0.5 + 0.15 * Math.sin(t / 3) + (rnd() - 0.5) * 0.1) * 9.81, y: (rnd() - 0.5) * 0.2 * 9.81, z: (0.8 + (rnd() - 0.5) * 0.1) * 9.81 }, rotationRate: { alpha: (rnd() - 0.5) * 0.1 * 250, beta: (rnd() - 0.5) * 0.1 * 250, gamma: (sgn * 0.3 + (rnd() - 0.5) * 0.1) * 250 }, interval: 16 })); }, 16);
       setTimeout(() => clearInterval(this.timer), ms);
     },
     stop() { clearInterval(this.timer); },
@@ -102,7 +104,8 @@ async function motion() {
   // rename a class, add + delete a class
   await p.fill('[data-rename]:nth-of-type(1)', 'tilt left'); await p.press('[data-rename]:nth-of-type(1)', 'Tab');
   await p.click('[data-act=addclass]');
-  ok(await p.locator('.tr-class').count() === 3, 'add class → 3 classes');
+  await until(p, () => document.querySelectorAll('.tr-class').length === 3, null, 10000);
+  ok(true, 'add class → 3 classes');
   await p.locator('.tr-class').nth(2).locator('[data-delclass]').click();
   await until(p, () => document.querySelectorAll('.tr-class').length === 2, null, 10000);
   ok(true, 'delete class → back to 2 (with confirm)');
@@ -114,8 +117,8 @@ async function motion() {
   ok(!(await p.isVisible('.tr-badge')), 'real DeviceMotion events: not marked simulated');
   await p.click('.tr-class >> nth=0 >> [data-record]');
   await until(p, () => window.__train.state.samples.length === 1, null, 20000);
-  const s0 = await p.evaluate(() => Array.from(window.__train.state.samples[0].data.slice(0, 6)).map((v) => +v.toFixed(2)));
-  ok(Math.abs(s0[0] + 0.5) < 0.3 && Math.abs(s0[5] + 0.3) < 0.05, `Record 2 s captures the live window (first row ${s0.join(', ')})`);
+  const s0 = await p.evaluate(() => Array.from(window.__train.state.samples[0].data.slice(-6)).map((v) => +v.toFixed(2)));
+  ok(Math.abs(s0[0] + 0.5) < 0.3 && Math.abs(s0[5] + 0.3) < 0.1, `Record 2 s captures the live window (latest row ${s0.join(', ')})`);
   // hold to record
   const hold = p.locator('.tr-class >> nth=1 >> [data-hold]');
   await p.evaluate(() => window.__m10.shake(1));
@@ -174,7 +177,9 @@ async function motion() {
   await zips(p, 'motion');
   // reload: data + model persist
   await p.reload();
-  await p.waitForFunction(() => window.__train?.state?.meta, null, { timeout: 90000 });
+  await p.waitForFunction(() => window.__sb?.openTrain, null, { timeout: 90000 });
+  await p.evaluate(() => window.__sb.openTrain({ sensor: 'motion' }));
+  await p.waitForFunction(() => window.__train?.state?.meta && window.__train.state.sensor === 'motion' && window.__train.state.samples.length, null, { timeout: 90000 });
   const per = await p.evaluate(() => ({ n: window.__train.state.samples.length, model: !!window.__train.state.model, name: window.__train.state.meta.classes[0].name }));
   ok(per.n === n0 + 2 && per.model && per.name === 'tilt left', `after reload: ${per.n} samples, trained model and class names restored from IndexedDB`);
   ok(p.errors.length === 0, `0 console errors (${p.errors.join(' | ')})`);
@@ -287,6 +292,7 @@ async function mobile() {
   await p.goto(`${BASE}/sandbox/`);
   await p.waitForFunction(() => window.__sb && !document.documentElement.classList.contains('is-loading'), null, { timeout: 90000 });
   await p.waitForTimeout(800);
+  await throttle3d(p, true);
   ok(await p.isVisible('[data-nav=train]'), 'Train item in the phone nav bar');
   await p.click('[data-nav=train]');
   await until(p, () => window.__train?.state?.meta, null, 60000);

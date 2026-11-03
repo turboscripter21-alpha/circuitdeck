@@ -291,7 +291,7 @@ async function onHold(e) {
   addEventListener('pointerup', up, { once: true }); addEventListener('pointercancel', up, { once: true });
   const cls = +b.dataset.hold;
   if (st.sensor !== 'camera' && !st.src.ready()) await waitWindow();
-  while (holding) { await capture(cls); await sleep(HOLD_MS[st.sensor]); }
+  do { await capture(cls); await sleep(HOLD_MS[st.sensor]); } while (holding); // a quick tap still records one
   b.classList.remove('is-recording');
 }
 
