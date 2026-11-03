@@ -250,7 +250,7 @@ export class Hardware {
         case 'led': { const vf = LED_VF[p.opts?.color || 'red'] || 1.8; const d = diff(`${id}.A`, `${id}.K`); st = { on: d >= vf ? Math.round(bright(`${id}.A`) * (a(`${id}.K`)?.duty != null ? 1 - a(`${id}.K`).duty : 1) * 100) / 100 : 0 }; break; }
         case 'rgbled': { const c = (k) => (diff(`${id}.${k}`, `${id}.GND`) >= 1.8 ? Math.round(bright(`${id}.${k}`) * 100) / 100 : 0); st = { r: c('R'), g: c('G'), b: c('B') }; break; }
         case 'trafficlight': { const c = (k) => diff(`${id}.${k}`, `${id}.GND`) >= 1.8; st = { r: c('R'), y: c('Y'), g: c('G') }; break; }
-        case 'buzzer': { const on = diff(`${id}.+`, `${id}.-`) > 2; const s0 = a(`${id}.+`); st = { on, freq: on ? (s0?.tone || 2300) : 0 }; break; }
+        case 'buzzer': { const on = diff(`${id}.+`, `${id}.-`) > 2; const s0 = a(`${id}.+`); st = { on, freq: on ? (s0?.tone || (s0?.duty > 0 && s0.duty < 1 && s0.freq > 400 && s0.freq <= 20000 ? s0.freq : 2300)) : 0 }; break; }
         case 'servo': {
           const s0 = a(`${id}.SIG`);
           const pow = (v(`${id}.V+`) ?? 0) >= 3 && v(`${id}.GND`) === 0;
