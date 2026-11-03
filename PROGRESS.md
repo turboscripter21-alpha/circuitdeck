@@ -189,3 +189,5 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 - chrome.js now measures: tighter track links first, then folds them into the menu if they would still overlap `.status`. Re-checks on resize/fonts/load.
 - Regressions on 84e611d: smoke all pass (exit 0, ERRORS 0), sb-test pass (ERRORS 0), p2-suite all 20/20 (ERRORS 0).
 - Shipping: pushed main (no force) and deployed from `git archive HEAD` before the remaining regressions (pi-all, m8, m9, m10, sound, m11).
+- Deployed c6b8298 → dpl_2v1knkETAiCoTGwZCo16apic9xBs. Live /canvas/ 200; ESP32 + Pi 5 starters run ("Hello from the canvas!"), mobile multi-board runs, overflow 0, 0 console errors / 0 HTTP errors. Screens: _compare/m11/live-{esp32-run,pi5-dark,mobile}.png
+- Remaining regressions on c6b8298 (local): pi-all light 29/29, m8-ai 10/10, m9-regression 24/24, m10-train 72/72 (incl. motion), sound-test all pass (errs []), m11-canvas 51/51 — all 0 console errors. No fixes needed; no redeploy.
