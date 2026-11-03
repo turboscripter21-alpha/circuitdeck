@@ -183,3 +183,8 @@ Scope (approved): 1 AI tutor · 2 editor AI help · 3 in-browser ML camera · 4 
 
 ### M11 WIP — real starter thumbnails
 - `_tools/cv-thumbs.mjs` renders /canvas/thumbs/<starter>.png from the live starters (same framing as the sandbox thumbs).
+
+### M11 WIP — header fit fix (smoke regression)
+- The 7th track (Canvas) pushed the theme button under the pinned progress card on 3D pages at 1600 px (smoke theme_* failed: click intercepted).
+- chrome.js now measures: tighter track links first, then folds them into the menu if they would still overlap `.status`. Re-checks on resize/fonts/load.
+- sb-test re-run: pass, 0 errors.

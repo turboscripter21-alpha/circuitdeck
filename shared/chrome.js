@@ -84,6 +84,22 @@
     syncSound();
     const ai = wrap.querySelector('[data-cd-ai]');
     if (ai) ai.addEventListener('click', () => window.CircuitDeckAI?.open());
+    // Fold the track links into the menu when they would run under the progress card
+    // (the 3D pages pin .status to the top right).
+    const fit = () => {
+      wrap.classList.remove('cd-fold', 'cd-tight');
+      const st = document.querySelector('.status');
+      if (!st || !st.offsetWidth || getComputedStyle(st).position === 'static') return;
+      const hits = () => { const a = wrap.getBoundingClientRect(), b = st.getBoundingClientRect(); return a.right > b.left - 8 && a.bottom > b.top && a.top < b.bottom; };
+      if (hits()) { wrap.classList.add('cd-tight'); if (hits()) { wrap.classList.remove('cd-tight'); wrap.classList.add('cd-fold'); } }
+      if (!wrap.classList.contains('cd-fold')) { wrap.classList.remove('is-open'); menu.setAttribute('aria-expanded', 'false'); }
+    };
+    let fitT;
+    window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fit, 80); });
+    fit();
+    document.fonts?.ready.then(fit);
+    window.addEventListener('load', fit);
+    setTimeout(fit, 1500);
   }
   // sound on/off (pages with simulated parts); the audio itself lives in src/core/sound.js
   const SKEY = 'circuitdeck:sound';

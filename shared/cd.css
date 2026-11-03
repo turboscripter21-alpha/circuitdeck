@@ -28,6 +28,12 @@ html.compact .cd-theme,html.compact .cd-menu{width:36px;height:36px;border-radiu
   .cd-chrome.is-open .cd-tracks{display:flex}
   .cd-tracks a{padding:10px 12px;font-size:15px}
 }
+.cd-chrome.cd-tight{gap:6px}
+.cd-chrome.cd-tight .cd-tracks a{padding:6px 7px;font-size:13px}
+.cd-chrome.cd-fold .cd-menu{display:inline-grid}
+.cd-chrome.cd-fold .cd-tracks{display:none;position:absolute;right:0;top:calc(100% + 8px);flex-direction:column;min-width:170px;z-index:50}
+.cd-chrome.cd-fold.is-open .cd-tracks{display:flex}
+.cd-chrome.cd-fold .cd-tracks a{padding:10px 12px;font-size:15px}
 
 /* ---------- dark theme: variables ---------- */
 html[data-theme=dark]{
