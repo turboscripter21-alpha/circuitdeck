@@ -3,6 +3,7 @@
   padding:14px 14px 16px;overflow:auto;background:#fffbf5fa;border:1.5px solid var(--line);border-radius:15px;box-shadow:0 18px 40px -22px #6e4e268c;
   color:var(--ink);font-size:14px;line-height:1.4;opacity:0;transform:translate(-10px);transition:opacity .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
 .tr-panel.is-open{opacity:1;transform:none}
+.tr-panel[hidden]{display:none}
 html[data-theme=dark] .tr-panel{background:#1c2430f5}
 .tr-head{display:flex;align-items:flex-start;gap:8px}
 .tr-head>div{flex:1;min-width:0}

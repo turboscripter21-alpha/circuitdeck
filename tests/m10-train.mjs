@@ -288,7 +288,7 @@ async function serial() {
 // ------------------------------------------------------------------ mobile 390x844 (Android UA, dark)
 async function mobile() {
   console.log('mobile 390x844, Android Chrome UA, dark theme');
-  const p = await page({ mobile: true, theme: 'dark' });
+  const p = await page({ mobile: true, theme: 'dark', noSerial: true }); // Android Chrome: no navigator.serial
   await p.goto(`${BASE}/sandbox/`);
   await p.waitForFunction(() => window.__sb && !document.documentElement.classList.contains('is-loading'), null, { timeout: 90000 });
   await p.waitForTimeout(800);
@@ -297,12 +297,13 @@ async function mobile() {
   await p.click('[data-nav=train]');
   await until(p, () => window.__train?.state?.meta, null, 60000);
   await p.click('[data-sensor=motion]');
-  await until(p, () => window.__train.state.sensor === 'motion', null, 10000);
+  await until(p, () => window.__train.state.sensor === 'motion' && window.__train.state.meta?.classes, null, 20000);
   const g = await p.evaluate(() => { const r = document.querySelector('#train-panel').getBoundingClientRect(); return { w: r.width, h: r.height, sw: document.querySelector('#train-panel').scrollWidth }; });
   ok(g.w === 390 && g.h === 844 && g.sw <= 390, `full-screen sheet ${g.w}×${g.h}, no sideways scroll`);
   await seed(p, 'motion', 6); await tab(p, 'train'); await train(p, 10); await tab(p, 'deploy');
   const t = await p.textContent('.tr-noserial');
   ok(/Android Chrome has no Web Serial/.test(t), 'Android: clear "no Web Serial" message + zips');
+  await p.evaluate(() => document.querySelector('.tr-noserial').scrollIntoView({ block: 'center' }));
   await shot(p, 'm10-mobile-deploy-dark');
   await p.click('[data-act=close]');
   ok(!(await p.isVisible('#train-panel')), 'close button hides the panel');
